@@ -65,7 +65,30 @@ const api = {
     });
     return r.json();
   },
+  async reverseGeocode(lat, lng) {
+    const r = await fetch(`/api/reverse-geocode?lat=${lat}&lng=${lng}`);
+    return r.json();
+  },
+  async directions(originLat, originLng, destLat, destLng) {
+    const r = await fetch(`/api/directions?origin_lat=${originLat}&origin_lng=${originLng}&dest_lat=${destLat}&dest_lng=${destLng}&mode=transit`);
+    return r.json();
+  },
 };
+
+function decodePolyline(encoded) {
+  const points = [];
+  let index = 0, lat = 0, lng = 0;
+  while (index < encoded.length) {
+    let b, shift = 0, result = 0;
+    do { b = encoded.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
+    lat += (result & 1) ? ~(result >> 1) : result >> 1;
+    shift = result = 0;
+    do { b = encoded.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
+    lng += (result & 1) ? ~(result >> 1) : result >> 1;
+    points.push([lat / 1e5, lng / 1e5]);
+  }
+  return points;
+}
 
 // ── Address input with Google Places autocomplete ─────────────────────────────
 
