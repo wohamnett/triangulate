@@ -179,5 +179,7 @@ Return ONLY valid JSON:
   }
 });
 
+const path = require("path");
+if (process.env.NODE_ENV === "production") { app.use(require("express").static(path.join(__dirname, "../dist"))); app.get("*", (req, res) => { if (!req.path.startsWith("/api")) res.sendFile(path.join(__dirname, "../dist/index.html")); }); }
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, "0.0.0.0", () => console.log(`Triangulate API server running on http://localhost:${PORT}`));
