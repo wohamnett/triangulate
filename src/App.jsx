@@ -396,7 +396,7 @@ export default function App() {
         <div style={{ display: 'flex', gap: 5 }}>
           {LIGHT_COLORS.slice(0, 3).map((c, i) => <div key={i} style={{ width: 8, height: 8, borderRadius: '50%', background: c }} />)}
         </div>
-        <span style={{ fontFamily: "'Syne', sans-serif", fontSize: 16, fontWeight: 800, letterSpacing: '0.04em', color: '#2a2520' }}>TRIANGULATE</span>
+        <span style={{ fontFamily: "'Syne', sans-serif", fontSize: 16, fontWeight: 800, letterSpacing: '0.04em', color: '#2a2520' }}>TRIANGULATE ✦</span>
         <span style={{ fontSize: 10, color: '#C8C0B0', marginLeft: 2 }}>/ nyc meetup finder</span>
         {step === 'results' && (
           <button onClick={reset}
