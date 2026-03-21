@@ -66,6 +66,23 @@ const api = {
   },
 };
 
+
+// Decode Google's encoded polyline format into [lat, lng] pairs
+function decodePolyline(encoded) {
+  const points = [];
+  let index = 0, lat = 0, lng = 0;
+  while (index < encoded.length) {
+    let shift = 0, result = 0, b;
+    do { b = encoded.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
+    lat += (result & 1) ? ~(result >> 1) : result >> 1;
+    shift = 0; result = 0;
+    do { b = encoded.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
+    lng += (result & 1) ? ~(result >> 1) : result >> 1;
+    points.push([lat / 1e5, lng / 1e5]);
+  }
+  return points;
+}
+
 function AddressInput({ value, onChange, onSelect, placeholder, color }) {
   const [query, setQuery] = useState(value || '');
   const [suggestions, setSuggestions] = useState([]);
@@ -150,12 +167,28 @@ function FitBounds({ points }) {
 }
 
 function MapView({ friends, venues, midpoint, selectedVenueIndex }) {
+  const [routes, setRoutes] = useState([]);
+  const topVenue = venues[selectedVenueIndex ?? 0];
+
+  useEffect(() => {
+    if (!topVenue?.coords) return;
+    setRoutes([]);
+    Promise.all(
+      friends.filter(f => f.coords).map(async (f, i) => {
+        try {
+          const r = await fetch(`/api/directions?olat=${f.coords.lat}&olng=${f.coords.lng}&dlat=${topVenue.coords.lat}&dlng=${topVenue.coords.lng}`);
+          const d = await r.json();
+          if (d.polyline) return { points: decodePolyline(d.polyline), color: LIGHT_COLORS[i % LIGHT_COLORS.length] };
+        } catch {}
+        return null;
+      })
+    ).then(rs => setRoutes(rs.filter(Boolean)));
+  }, [selectedVenueIndex, friends, venues]);
+
   const allCoords = [
     ...friends.filter(f => f.coords).map(f => [f.coords.lat, f.coords.lng]),
     ...venues.filter(v => v.coords).map(v => [v.coords.lat, v.coords.lng]),
   ];
-  const topVenue = venues[selectedVenueIndex ?? 0];
-
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
       <MapContainer center={[midpoint.lat, midpoint.lng]} zoom={13}
@@ -165,12 +198,18 @@ function MapView({ friends, venues, midpoint, selectedVenueIndex }) {
         <Circle center={[midpoint.lat, midpoint.lng]} radius={400}
           pathOptions={{ color: '#C17B2F', fillColor: '#C17B2F', fillOpacity: 0.06, weight: 1, opacity: 0.3 }} />
 
-        {/* Journey lines from each friend to selected venue */}
-        {topVenue?.coords && friends.filter(f => f.coords).map((f, i) => (
-          <Polyline key={f.id}
-            positions={[[f.coords.lat, f.coords.lng], [topVenue.coords.lat, topVenue.coords.lng]]}
-            pathOptions={{ color: LIGHT_COLORS[i % LIGHT_COLORS.length], weight: 2, opacity: 0.5, dashArray: '6 6' }} />
-        ))}
+        {/* Real transit routes from each friend to selected venue */}
+        {routes.length > 0
+          ? routes.map((r, i) => (
+              <Polyline key={i} positions={r.points}
+                pathOptions={{ color: r.color, weight: 3, opacity: 0.7 }} />
+            ))
+          : topVenue?.coords && friends.filter(f => f.coords).map((f, i) => (
+              <Polyline key={f.id}
+                positions={[[f.coords.lat, f.coords.lng], [topVenue.coords.lat, topVenue.coords.lng]]}
+                pathOptions={{ color: LIGHT_COLORS[i % LIGHT_COLORS.length], weight: 2, opacity: 0.4, dashArray: '6 6' }} />
+            ))
+        }
 
         {/* Friend markers */}
         {friends.filter(f => f.coords).map((f, i) => {
