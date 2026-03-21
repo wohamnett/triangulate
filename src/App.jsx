@@ -293,6 +293,9 @@ export default function App() {
   const [results, setResults]       = useState(null);
   const [error, setError]           = useState(null);
   const [step, setStep]             = useState('setup');
+  const [selectedVenueIndex, setSelectedVenueIndex] = useState(0);
+  const [routes, setRoutes] = useState([]);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   const selectedVenue = VENUE_TYPES.find(v => v.id === venueType);
 
