@@ -324,6 +324,9 @@ export default function App() {
   const [selectedVenueIndex, setSelectedVenueIndex] = useState(0);
   const [routes, setRoutes] = useState([]);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [selectedVenueIndex, setSelectedVenueIndex] = useState(0);
+  const [routes, setRoutes] = useState([]);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
     const handler = () => setIsMobile(window.innerWidth < 768);
