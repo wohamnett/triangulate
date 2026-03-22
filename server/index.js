@@ -103,7 +103,15 @@ app.get("/api/directions", async (req, res) => {
     const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin_lat},${origin_lng}&destination=${dest_lat},${dest_lng}&mode=${mode || "transit"}&key=${GMAPS_KEY}`;
     const data = await fetch(url).then(r => r.json());
     if (data.routes?.[0]) {
-      res.json({ polyline: data.routes[0].overview_polyline.points, duration: data.routes[0].legs[0].duration.text });
+      const legs = data.routes[0].legs[0];
+      const steps = legs.steps.map(s => ({
+        polyline: s.polyline.points,
+        mode: s.travel_mode,
+        duration: s.duration.text,
+        line: s.transit_details?.line?.short_name || s.transit_details?.line?.name || null,
+        vehicle: s.transit_details?.line?.vehicle?.type || null,
+      }));
+      res.json({ polyline: data.routes[0].overview_polyline.points, steps, duration: legs.duration.text });
     } else {
       res.status(404).json({ error: "No route found", status: data.status });
     }
