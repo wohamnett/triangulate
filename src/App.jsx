@@ -617,8 +617,14 @@ export default function App() {
                         <div style={{ width: 5, height: 5, borderRadius: '50%', background: LIGHT_COLORS[j % LIGHT_COLORS.length], flexShrink: 0 }} />
                         <span style={{ fontSize: 10, color: '#7a7060', width: 50, flexShrink: 0 }}>{t.person}</span>
                         <span style={{ fontSize: 10, fontFamily: "'DM Mono'", color: t.minutes ? '#2a2520' : '#C8C0B0', width: 30, flexShrink: 0 }}>{t.minutes ? `${t.minutes}m` : '—'}</span>
-                        <span style={{ fontSize: 10 }}>🚇</span>
-                        {t.route && <span style={{ fontSize: 9, color: '#B8A898', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.route}</span>}
+                        {routes && routes[j] && routes[j].steps ? (
+                          <span style={{ fontSize: 9, color: '#B8A898', display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+                            {routes[j].steps.map((s, si) => {
+                              const icon = s.mode === 'WALKING' ? '🚶' : s.vehicle === 'SUBWAY' ? '🚇' : s.vehicle === 'BUS' ? '🚌' : '🚆';
+                              return <span key={si}>{icon}{s.line ? ' '+s.line : ''} {s.duration}</span>;
+                            })}
+                          </span>
+                        ) : t.route ? <span style={{ fontSize: 9, color: '#B8A898' }}>{t.route}</span> : null}
                       </div>
                     ))}
                   </div>
