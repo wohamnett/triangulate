@@ -212,7 +212,7 @@ function FitBounds({ points }) {
   return null;
 }
 
-function MapView({ friends, venues, midpoint }) {
+function MapView({ friends, venues, midpoint, selectedVenueIndex, routes }) {
   const allCoords = [
     ...friends.filter(f => f.coords).map(f => [f.coords.lat, f.coords.lng]),
     ...venues.filter(v => v.coords).map(v => [v.coords.lat, v.coords.lng]),
@@ -293,9 +293,6 @@ export default function App() {
   const [results, setResults]       = useState(null);
   const [error, setError]           = useState(null);
   const [step, setStep]             = useState('setup');
-  const [selectedVenueIndex, setSelectedVenueIndex] = useState(0);
-  const [routes, setRoutes] = useState([]);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   const selectedVenue = VENUE_TYPES.find(v => v.id === venueType);
 
@@ -399,7 +396,7 @@ export default function App() {
         <div style={{ display: 'flex', gap: 5 }}>
           {LIGHT_COLORS.slice(0, 3).map((c, i) => <div key={i} style={{ width: 8, height: 8, borderRadius: '50%', background: c }} />)}
         </div>
-        <span style={{ fontFamily: "'Syne', sans-serif", fontSize: 16, fontWeight: 800, letterSpacing: '0.04em', color: '#2a2520' }}>TRIANGULATE ✦</span>
+        <span style={{ fontFamily: "'Syne', sans-serif", fontSize: 16, fontWeight: 800, letterSpacing: '0.04em', color: '#2a2520' }}>TRIANGULATE</span>
         <span style={{ fontSize: 10, color: '#C8C0B0', marginLeft: 2 }}>/ nyc meetup finder</span>
         {step === 'results' && (
           <button onClick={reset}
@@ -523,11 +520,15 @@ export default function App() {
 
       {/* ── Results ── */}
       {step === 'results' && results && (
-        <div style={{ display: 'flex', height: 'calc(100vh - 52px)' }}>
+        <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', height: isMobile ? 'auto' : 'calc(100vh - 52px)' }}>
 
-          {/* Sidebar */}
-          <div style={{ width: 360, flexShrink: 0, overflowY: 'auto', borderRight: '1px solid #E0D8CC',
-            padding: '18px 16px', background: '#F5F0E8' }}>
+          {/* Map top on mobile */}
+          <div style={{ order: isMobile ? 1 : 2, flex: isMobile ? 'none' : 1, height: isMobile ? '55vw' : '100%', minHeight: 240 }}>
+            <MapView friends={results.friends} venues={results.venues} midpoint={results.centroid} selectedVenueIndex={selectedVenueIndex} routes={routes} />
+          </div>
+
+          {/* Sidebar below map on mobile */}
+          <div style={{ order: isMobile ? 2 : 1, width: isMobile ? '100%' : 360, flexShrink: 0, overflowY: isMobile ? 'visible' : 'auto', borderRight: isMobile ? 'none' : '1px solid #E0D8CC', borderTop: isMobile ? '1px solid #E0D8CC' : 'none', padding: '18px 16px', background: '#F5F0E8' }}>
 
             {/* Crew */}
             <div style={{ ...card, marginBottom: 12, padding: '10px 14px' }}>
@@ -631,14 +632,9 @@ export default function App() {
             </button>
           </div>
 
-          {/* Map */}
-          <div style={{ flex: 1 }}>
-            <MapView friends={results.friends} venues={results.venues} midpoint={results.centroid} />
-          </div>
         </div>
       )}
     </div>
   );
 }
 
-// cache bust Sat Mar 21 23:25:07 GMT 2026
