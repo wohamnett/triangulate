@@ -110,10 +110,9 @@ function AddressInput({ value, onChange, onSelect, placeholder, color }) {
     const showAbove = spaceBelow < 120 && spaceAbove > spaceBelow;
     setDropdownStyle({
       position: 'fixed',
-      top: showAbove ? undefined : rect.bottom + 4,
-      bottom: showAbove ? window.innerHeight - rect.top + 4 : undefined,
-      left: rect.left,
-      width: rect.width + 60,
+      top: rect.bottom + 4,
+      left: Math.max(8, rect.left - 40),
+      width: Math.min(window.innerWidth - 16, rect.width + 80),
       zIndex: 999999,
     });
   };
