@@ -97,27 +97,6 @@ app.get('/api/reverse-geocode', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.get("/api/directions", async (req, res) => {
-  const { origin_lat, origin_lng, dest_lat, dest_lng, mode } = req.query;
-  try {
-    const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin_lat},${origin_lng}&destination=${dest_lat},${dest_lng}&mode=${mode || "transit"}&key=${GMAPS_KEY}`;
-    const data = await fetch(url).then(r => r.json());
-    if (data.routes?.[0]) {
-      const legs = data.routes[0].legs[0];
-      const steps = legs.steps.map(s => ({
-        polyline: s.polyline.points,
-        mode: s.travel_mode,
-        duration: s.duration.text,
-        line: s.transit_details?.line?.short_name || s.transit_details?.line?.name || null,
-        vehicle: s.transit_details?.line?.vehicle?.type || null,
-      }));
-      res.json({ polyline: data.routes[0].overview_polyline.points, steps, duration: legs.duration.text });
-    } else {
-      res.status(404).json({ error: "No route found", status: data.status });
-    }
-  } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
 app.post('/api/distances', async (req, res) => {
   const { origins, destination } = req.body;
   if (!origins || !destination) return res.status(400).json({ error: 'origins and destination required' });
@@ -200,7 +179,5 @@ Return ONLY valid JSON:
   }
 });
 
-const path = require("path");
-if (process.env.NODE_ENV === "production") { app.use(require("express").static(path.join(__dirname, "../dist"))); app.get("*", (req, res) => { if (!req.path.startsWith("/api")) res.sendFile(path.join(__dirname, "../dist/index.html")); }); }
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`Triangulate API server running on http://localhost:${PORT}`));
