@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import ReactDOM from 'react-dom';
-import { MapContainer, TileLayer, Marker, Popup, Circle, Polyline, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -105,9 +105,13 @@ function AddressInput({ value, onChange, onSelect, placeholder, color }) {
   const updateDropdownPosition = () => {
     if (!inputRef.current) return;
     const rect = inputRef.current.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    const showAbove = spaceBelow < 120 && spaceAbove > spaceBelow;
     setDropdownStyle({
       position: 'fixed',
-      top: rect.bottom + 4,
+      top: showAbove ? undefined : rect.bottom + 4,
+      bottom: showAbove ? window.innerHeight - rect.top + 4 : undefined,
       left: rect.left,
       width: rect.width + 60,
       zIndex: 999999,
@@ -228,23 +232,30 @@ function MapView({ friends, venues, midpoint, selectedVenueIndex, routes }) {
         <Circle center={[midpoint.lat, midpoint.lng]} radius={400}
           pathOptions={{ color: '#C17B2F', fillColor: '#C17B2F', fillOpacity: 0.06, weight: 1, opacity: 0.3 }} />
 
+        {/* Route lines */}
         {friends.filter(f => f.coords).map((f, i) => {
+          const route = routes?.[i];
           const color = LIGHT_COLORS[i % LIGHT_COLORS.length];
-          const route = (routes || [])[i];
-          const tv = venues[selectedVenueIndex || 0];
-          if (route && route.steps && route.steps.length) {
+          if (route?.steps && route.steps.length) {
             return route.steps.map((step, si) => {
-              const walk = step.mode === 'WALKING';
-              return <Polyline key={'r'+f.id+si} positions={decodePolyline(step.polyline)}
-                pathOptions={{ color, weight: walk ? 2 : 4, opacity: walk ? 0.5 : 0.85, dashArray: walk ? '4 7' : null }} />;
+              const walk = step.mode === 'WALKING' || step.mode === 'BICYCLING';
+              return <Polyline key={f.id+'-'+si} positions={decodePolyline(step.polyline)}
+                pathOptions={{ color, weight: walk ? 2 : 4, opacity: walk ? 0.45 : 0.85, dashArray: walk ? '5 8' : null }} />;
             });
           }
-          return route && route.polyline
-            ? <Polyline key={'r'+f.id} positions={decodePolyline(route.polyline)} pathOptions={{ color, weight: 3, opacity: 0.7 }} />
-            : tv && tv.coords
-              ? <Polyline key={'r'+f.id} positions={[[f.coords.lat, f.coords.lng],[tv.coords.lat, tv.coords.lng]]} pathOptions={{ color, weight: 2, opacity: 0.4, dashArray: '6 6' }} />
-              : null;
+          if (route?.polyline) {
+            return <Polyline key={f.id} positions={decodePolyline(route.polyline)}
+              pathOptions={{ color, weight: 3, opacity: 0.65 }} />;
+          }
+          const topVenue = venues[selectedVenueIndex ?? 0];
+          if (topVenue?.coords) {
+            return <Polyline key={f.id}
+              positions={[[f.coords.lat, f.coords.lng], [topVenue.coords.lat, topVenue.coords.lng]]}
+              pathOptions={{ color, weight: 2, opacity: 0.4, dashArray: '6 6' }} />;
+          }
+          return null;
         })}
+
         {friends.filter(f => f.coords).map((f, i) => {
           const color = LIGHT_COLORS[i % LIGHT_COLORS.length];
           const dark = COLORS[i % COLORS.length];
@@ -314,14 +325,46 @@ export default function App() {
   const [routes, setRoutes] = useState([]);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-  const selectedVenue = VENUE_TYPES.find(v => v.id === venueType);
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
 
+  const selectedVenue = VENUE_TYPES.find(v => v.id === venueType);
   const addFriend    = () => { if (friends.length < 6) setFriends(f => [...f, { id: Date.now(), name: '', address: '', coords: null }]); };
   const removeFriend = id => { if (friends.length > 2) setFriends(f => f.filter(x => x.id !== id)); };
   const updateFriend = (id, field, val) => setFriends(f => f.map(x => x.id === id ? { ...x, [field]: val } : x));
   const setCoords    = (id, coords, label) => setFriends(f => f.map(x => x.id === id ? { ...x, coords, address: label || x.address } : x));
+  const reset = () => { setStep('setup'); setResults(null); setError(null); setSelectedVenueIndex(0); setRoutes([]); };
 
-  const reset = () => { setStep('setup'); setResults(null); setError(null); };
+  const selectVenue = (i) => {
+    setSelectedVenueIndex(i);
+    if (!results) return;
+    const venue = results.venues[i];
+    if (!venue?.coords) return;
+    setRoutes([]);
+    Promise.all(results.friends.map(f =>
+      api.directions(f.coords.lat, f.coords.lng, venue.coords.lat, venue.coords.lng).catch(() => null)
+    )).then(setRoutes);
+  };
+
+  const useMyLocation = (id) => {
+    if (!navigator.geolocation) { alert('Geolocation not supported'); return; }
+    updateFriend(id, 'address', 'Getting your location…');
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      const { latitude: lat, longitude: lng } = pos.coords;
+      try {
+        const data = await api.reverseGeocode(lat, lng);
+        const address = data.formatted || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+        updateFriend(id, 'address', address);
+        setCoords(id, { lat, lng }, address);
+      } catch {
+        updateFriend(id, 'address', `${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+        setCoords(id, { lat, lng });
+      }
+    }, () => { updateFriend(id, 'address', ''); alert('Could not get location.'); });
+  };
 
   const findMeetup = useCallback(async () => {
     const bad = friends.filter(f => !f.name.trim() || !f.address.trim());
@@ -542,13 +585,14 @@ export default function App() {
       {step === 'results' && results && (
         <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', height: isMobile ? 'auto' : 'calc(100vh - 52px)' }}>
 
-          {/* Map top on mobile */}
-          <div style={{ order: isMobile ? 1 : 2, flex: isMobile ? 'none' : 1, height: isMobile ? '55vw' : '100%', minHeight: 240 }}>
+          {/* Map — top on mobile */}
+          <div style={{ order: isMobile ? 1 : 2, flex: isMobile ? 'none' : 1, height: isMobile ? '55vw' : '100%', minHeight: isMobile ? 240 : 'auto' }}>
             <MapView friends={results.friends} venues={results.venues} midpoint={results.centroid} selectedVenueIndex={selectedVenueIndex} routes={routes} />
           </div>
 
-          {/* Sidebar below map on mobile */}
-          <div style={{ order: isMobile ? 2 : 1, width: isMobile ? '100%' : 360, flexShrink: 0, overflowY: isMobile ? 'visible' : 'auto', borderRight: isMobile ? 'none' : '1px solid #E0D8CC', borderTop: isMobile ? '1px solid #E0D8CC' : 'none', padding: '18px 16px', background: '#F5F0E8' }}>
+          {/* Sidebar — below map on mobile */}
+          <div style={{ order: isMobile ? 2 : 1, width: isMobile ? '100%' : 360, flexShrink: 0, overflowY: isMobile ? 'visible' : 'auto', borderRight: isMobile ? 'none' : '1px solid #E0D8CC', borderTop: isMobile ? '1px solid #E0D8CC' : 'none',
+            padding: '18px 16px', background: '#F5F0E8' }}>
 
             {/* Crew */}
             <div style={{ ...card, marginBottom: 12, padding: '10px 14px' }}>
@@ -576,7 +620,7 @@ export default function App() {
 
             {/* Venue cards */}
             {results.venues.map((v, i) => (
-              <div key={i} style={{ ...card, marginBottom: 12,
+              <div key={i} onClick={() => selectVenue(i)} style={{ ...card, marginBottom: 12, cursor: "pointer",
                 border: `1px solid ${i === 0 ? 'rgba(193,123,47,0.4)' : '#E0D8CC'}` }}>
                 {v.photo && (
                   <div style={{ height: 100, overflow: 'hidden', position: 'relative', borderRadius: '10px 10px 0 0' }}>
@@ -624,14 +668,8 @@ export default function App() {
                         <div style={{ width: 5, height: 5, borderRadius: '50%', background: LIGHT_COLORS[j % LIGHT_COLORS.length], flexShrink: 0 }} />
                         <span style={{ fontSize: 10, color: '#7a7060', width: 50, flexShrink: 0 }}>{t.person}</span>
                         <span style={{ fontSize: 10, fontFamily: "'DM Mono'", color: t.minutes ? '#2a2520' : '#C8C0B0', width: 30, flexShrink: 0 }}>{t.minutes ? `${t.minutes}m` : '—'}</span>
-                        {routes && routes[j] && routes[j].steps ? (
-                          <span style={{ fontSize: 9, color: '#B8A898', display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-                            {routes[j].steps.map((s, si) => {
-                              const icon = s.mode === 'WALKING' ? '🚶' : s.vehicle === 'SUBWAY' ? '🚇' : s.vehicle === 'BUS' ? '🚌' : '🚆';
-                              return <span key={si}>{icon}{s.line ? ' '+s.line : ''} {s.duration}</span>;
-                            })}
-                          </span>
-                        ) : t.route ? <span style={{ fontSize: 9, color: '#B8A898' }}>{t.route}</span> : null}
+                        <span style={{ fontSize: 10 }}>🚇</span>
+                        {t.route && <span style={{ fontSize: 9, color: '#B8A898', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.route}</span>}
                       </div>
                     ))}
                   </div>
