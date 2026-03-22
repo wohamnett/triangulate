@@ -230,6 +230,16 @@ function MapView({ friends, venues, midpoint, selectedVenueIndex, routes }) {
 
         {friends.filter(f => f.coords).map((f, i) => {
           const color = LIGHT_COLORS[i % LIGHT_COLORS.length];
+          const route = (routes || [])[i];
+          const tv = venues[selectedVenueIndex || 0];
+          return route && route.polyline
+            ? <Polyline key={'r'+f.id} positions={decodePolyline(route.polyline)} pathOptions={{ color, weight: 3, opacity: 0.7 }} />
+            : tv && tv.coords
+              ? <Polyline key={'r'+f.id} positions={[[f.coords.lat, f.coords.lng],[tv.coords.lat, tv.coords.lng]]} pathOptions={{ color, weight: 2, opacity: 0.4, dashArray: '6 6' }} />
+              : null;
+        })}
+        {friends.filter(f => f.coords).map((f, i) => {
+          const color = LIGHT_COLORS[i % LIGHT_COLORS.length];
           const dark = COLORS[i % COLORS.length];
           const icon = makeIcon(`<div style="width:30px;height:30px;border-radius:50%;background:${color};border:2.5px solid white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:white;font-family:sans-serif;box-shadow:0 2px 8px rgba(0,0,0,0.2)">${(f.name[0]||'?').toUpperCase()}</div>`);
           return (
