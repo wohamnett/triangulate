@@ -105,9 +105,6 @@ function AddressInput({ value, onChange, onSelect, placeholder, color }) {
   const updateDropdownPosition = () => {
     if (!inputRef.current) return;
     const rect = inputRef.current.getBoundingClientRect();
-    const spaceBelow = window.innerHeight - rect.bottom;
-    const spaceAbove = rect.top;
-    const showAbove = spaceBelow < 120 && spaceAbove > spaceBelow;
     setDropdownStyle({
       position: 'fixed',
       top: rect.bottom + 4,
