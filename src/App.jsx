@@ -232,6 +232,13 @@ function MapView({ friends, venues, midpoint, selectedVenueIndex, routes }) {
           const color = LIGHT_COLORS[i % LIGHT_COLORS.length];
           const route = (routes || [])[i];
           const tv = venues[selectedVenueIndex || 0];
+          if (route && route.steps && route.steps.length) {
+            return route.steps.map((step, si) => {
+              const walk = step.mode === 'WALKING';
+              return <Polyline key={'r'+f.id+si} positions={decodePolyline(step.polyline)}
+                pathOptions={{ color, weight: walk ? 2 : 4, opacity: walk ? 0.5 : 0.85, dashArray: walk ? '4 7' : null }} />;
+            });
+          }
           return route && route.polyline
             ? <Polyline key={'r'+f.id} positions={decodePolyline(route.polyline)} pathOptions={{ color, weight: 3, opacity: 0.7 }} />
             : tv && tv.coords
