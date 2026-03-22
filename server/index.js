@@ -97,6 +97,19 @@ app.get('/api/reverse-geocode', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+app.get("/api/directions", async (req, res) => {
+  const { origin_lat, origin_lng, dest_lat, dest_lng, mode } = req.query;
+  try {
+    const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin_lat},${origin_lng}&destination=${dest_lat},${dest_lng}&mode=${mode || "transit"}&key=${GMAPS_KEY}`;
+    const data = await fetch(url).then(r => r.json());
+    if (data.routes?.[0]) {
+      res.json({ polyline: data.routes[0].overview_polyline.points, duration: data.routes[0].legs[0].duration.text });
+    } else {
+      res.status(404).json({ error: "No route found", status: data.status });
+    }
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 app.post('/api/distances', async (req, res) => {
   const { origins, destination } = req.body;
   if (!origins || !destination) return res.status(400).json({ error: 'origins and destination required' });
