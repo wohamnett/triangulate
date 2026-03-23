@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import ReactDOM from 'react-dom';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
 
@@ -65,30 +64,7 @@ const api = {
     });
     return r.json();
   },
-  async reverseGeocode(lat, lng) {
-    const r = await fetch(`/api/reverse-geocode?lat=${lat}&lng=${lng}`);
-    return r.json();
-  },
-  async directions(originLat, originLng, destLat, destLng) {
-    const r = await fetch(`/api/directions?origin_lat=${originLat}&origin_lng=${originLng}&dest_lat=${destLat}&dest_lng=${destLng}&mode=transit`);
-    return r.json();
-  },
 };
-
-function decodePolyline(encoded) {
-  const points = [];
-  let index = 0, lat = 0, lng = 0;
-  while (index < encoded.length) {
-    let b, shift = 0, result = 0;
-    do { b = encoded.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
-    lat += (result & 1) ? ~(result >> 1) : result >> 1;
-    shift = result = 0;
-    do { b = encoded.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
-    lng += (result & 1) ? ~(result >> 1) : result >> 1;
-    points.push([lat / 1e5, lng / 1e5]);
-  }
-  return points;
-}
 
 // ── Address input with Google Places autocomplete ─────────────────────────────
 
@@ -97,22 +73,7 @@ function AddressInput({ value, onChange, onSelect, placeholder, color }) {
   const [suggestions, setSuggestions] = useState([]);
   const [open, setOpen] = useState(false);
   const [fetching, setFetching] = useState(false);
-  const [dropdownStyle, setDropdownStyle] = useState({});
-  const inputRef = useRef(null);
   const debounce = useRef(null);
-
-  // Position dropdown relative to input using fixed positioning — escapes all stacking contexts
-  const updateDropdownPosition = () => {
-    if (!inputRef.current) return;
-    const rect = inputRef.current.getBoundingClientRect();
-    setDropdownStyle({
-      position: 'fixed',
-      top: rect.bottom + 4,
-      left: Math.max(8, rect.left - 40),
-      width: Math.min(window.innerWidth - 16, rect.width + 80),
-      zIndex: 999999,
-    });
-  };
 
   const handleChange = (e) => {
     const v = e.target.value;
@@ -125,8 +86,7 @@ function AddressInput({ value, onChange, onSelect, placeholder, color }) {
       try {
         const preds = await api.autocomplete(v);
         setSuggestions(preds.slice(0, 5));
-        if (preds.length > 0) { updateDropdownPosition(); setOpen(true); }
-        else setOpen(false);
+        setOpen(preds.length > 0);
       } catch { setSuggestions([]); }
       finally { setFetching(false); }
     }, 300);
@@ -146,11 +106,24 @@ function AddressInput({ value, onChange, onSelect, placeholder, color }) {
     } catch (e) { console.error('Geocode failed:', e); }
   };
 
-  // Portal dropdown rendered directly into document.body
-  const dropdown = open && suggestions.length > 0
-    ? ReactDOM.createPortal(
-        <div style={{ ...dropdownStyle, background: '#FDFAF5', border: '1px solid #D4CCC0',
-          borderRadius: 8, overflow: 'hidden', boxShadow: '0 8px 24px rgba(0,0,0,0.15)' }}>
+  return (
+    <div style={{ flex: 1, position: 'relative' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <input
+          value={query}
+          onChange={handleChange}
+          onFocus={() => suggestions.length > 0 && setOpen(true)}
+          onBlur={() => setTimeout(() => setOpen(false), 180)}
+          placeholder={placeholder}
+          style={{ flex: 1, background: 'none', border: 'none', outline: 'none',
+            color: '#3a3530', fontSize: 12, fontFamily: "'DM Mono', monospace" }}
+        />
+        {fetching && <span style={{ fontSize: 9, color: '#B8A898', animation: 'spin 1s linear infinite', display: 'inline-block' }}>◌</span>}
+      </div>
+      {open && suggestions.length > 0 && (
+        <div style={{ position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, zIndex: 99999,
+          background: '#FDFAF5', border: '1px solid #D4CCC0', borderRadius: 8,
+          overflow: 'hidden', boxShadow: '0 8px 24px rgba(0,0,0,0.15)' }}>
           {suggestions.map((s, i) => (
             <div key={s.place_id || i}
               onMouseDown={() => pick(s)}
@@ -173,27 +146,8 @@ function AddressInput({ value, onChange, onSelect, placeholder, color }) {
             fontSize: 8, color: '#C8C0B0', textAlign: 'right', letterSpacing: '0.05em' }}>
             powered by Google
           </div>
-        </div>,
-        document.body
-      )
-    : null;
-
-  return (
-    <div style={{ flex: 1 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <input
-          ref={inputRef}
-          value={query}
-          onChange={handleChange}
-          onFocus={() => { if (suggestions.length > 0) { updateDropdownPosition(); setOpen(true); } }}
-          onBlur={() => setTimeout(() => setOpen(false), 180)}
-          placeholder={placeholder}
-          style={{ flex: 1, background: 'none', border: 'none', outline: 'none',
-            color: '#3a3530', fontSize: 12, fontFamily: "'DM Mono', monospace" }}
-        />
-        {fetching && <span style={{ fontSize: 9, color: '#B8A898', animation: 'spin 1s linear infinite', display: 'inline-block' }}>◌</span>}
-      </div>
-      {dropdown}
+        </div>
+      )}
     </div>
   );
 }
@@ -212,7 +166,7 @@ function FitBounds({ points }) {
   return null;
 }
 
-function MapView({ friends, venues, midpoint, selectedVenueIndex, routes }) {
+function MapView({ friends, venues, midpoint }) {
   const allCoords = [
     ...friends.filter(f => f.coords).map(f => [f.coords.lat, f.coords.lng]),
     ...venues.filter(v => v.coords).map(v => [v.coords.lat, v.coords.lng]),
@@ -227,30 +181,6 @@ function MapView({ friends, venues, midpoint, selectedVenueIndex, routes }) {
 
         <Circle center={[midpoint.lat, midpoint.lng]} radius={400}
           pathOptions={{ color: '#C17B2F', fillColor: '#C17B2F', fillOpacity: 0.06, weight: 1, opacity: 0.3 }} />
-
-        {/* Route lines */}
-        {friends.filter(f => f.coords).map((f, i) => {
-          const route = routes?.[i];
-          const color = LIGHT_COLORS[i % LIGHT_COLORS.length];
-          if (route?.steps && route.steps.length) {
-            return route.steps.map((step, si) => {
-              const walk = step.mode === 'WALKING' || step.mode === 'BICYCLING';
-              return <Polyline key={f.id+'-'+si} positions={decodePolyline(step.polyline)}
-                pathOptions={{ color, weight: walk ? 2 : 4, opacity: walk ? 0.45 : 0.85, dashArray: walk ? '5 8' : null }} />;
-            });
-          }
-          if (route?.polyline) {
-            return <Polyline key={f.id} positions={decodePolyline(route.polyline)}
-              pathOptions={{ color, weight: 3, opacity: 0.65 }} />;
-          }
-          const topVenue = venues[selectedVenueIndex ?? 0];
-          if (topVenue?.coords) {
-            return <Polyline key={f.id}
-              positions={[[f.coords.lat, f.coords.lng], [topVenue.coords.lat, topVenue.coords.lng]]}
-              pathOptions={{ color, weight: 2, opacity: 0.4, dashArray: '6 6' }} />;
-          }
-          return null;
-        })}
 
         {friends.filter(f => f.coords).map((f, i) => {
           const color = LIGHT_COLORS[i % LIGHT_COLORS.length];
@@ -317,51 +247,15 @@ export default function App() {
   const [results, setResults]       = useState(null);
   const [error, setError]           = useState(null);
   const [step, setStep]             = useState('setup');
-  const [selectedVenueIndex, setSelectedVenueIndex] = useState(0);
-  const [routes, setRoutes] = useState([]);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [selectedVenueIndex, setSelectedVenueIndex] = useState(0);
-
-  useEffect(() => {
-    const handler = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', handler);
-    return () => window.removeEventListener('resize', handler);
-  }, []);
 
   const selectedVenue = VENUE_TYPES.find(v => v.id === venueType);
+
   const addFriend    = () => { if (friends.length < 6) setFriends(f => [...f, { id: Date.now(), name: '', address: '', coords: null }]); };
   const removeFriend = id => { if (friends.length > 2) setFriends(f => f.filter(x => x.id !== id)); };
   const updateFriend = (id, field, val) => setFriends(f => f.map(x => x.id === id ? { ...x, [field]: val } : x));
   const setCoords    = (id, coords, label) => setFriends(f => f.map(x => x.id === id ? { ...x, coords, address: label || x.address } : x));
-  const reset = () => { setStep('setup'); setResults(null); setError(null); setSelectedVenueIndex(0); setRoutes([]); };
 
-  const selectVenue = (i) => {
-    setSelectedVenueIndex(i);
-    if (!results) return;
-    const venue = results.venues[i];
-    if (!venue?.coords) return;
-    setRoutes([]);
-    Promise.all(results.friends.map(f =>
-      api.directions(f.coords.lat, f.coords.lng, venue.coords.lat, venue.coords.lng).catch(() => null)
-    )).then(setRoutes);
-  };
-
-  const useMyLocation = (id) => {
-    if (!navigator.geolocation) { alert('Geolocation not supported'); return; }
-    updateFriend(id, 'address', 'Getting your location…');
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-      const { latitude: lat, longitude: lng } = pos.coords;
-      try {
-        const data = await api.reverseGeocode(lat, lng);
-        const address = data.formatted || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-        updateFriend(id, 'address', address);
-        setCoords(id, { lat, lng }, address);
-      } catch {
-        updateFriend(id, 'address', `${lat.toFixed(4)}, ${lng.toFixed(4)}`);
-        setCoords(id, { lat, lng });
-      }
-    }, () => { updateFriend(id, 'address', ''); alert('Could not get location.'); });
-  };
+  const reset = () => { setStep('setup'); setResults(null); setError(null); };
 
   const findMeetup = useCallback(async () => {
     const bad = friends.filter(f => !f.name.trim() || !f.address.trim());
@@ -428,16 +322,7 @@ export default function App() {
       });
 
       venues.sort((a, b) => (b.combined_score || b.fairness) - (a.combined_score || a.fairness));
-      const resultData = { venues, friends, centroid, midpoint: recommendation.midpoint_neighborhood || 'NYC', midpoint_reason: recommendation.midpoint_reason || '' };
-      setResults(resultData);
-      // Fetch real directions for top venue
-      const topVenue = venues[0];
-      if (topVenue?.coords) {
-        const routePromises = friends.map(f =>
-          api.directions(f.coords.lat, f.coords.lng, topVenue.coords.lat, topVenue.coords.lng).catch(() => null)
-        );
-        Promise.all(routePromises).then(setRoutes);
-      }
+      setResults({ venues, friends, centroid, midpoint: recommendation.midpoint_neighborhood || 'NYC', midpoint_reason: recommendation.midpoint_reason || '' });
       setStep('results');
     } catch (e) {
       setError('Something went wrong: ' + (e.message || 'unknown error'));
@@ -580,15 +465,10 @@ export default function App() {
 
       {/* ── Results ── */}
       {step === 'results' && results && (
-        <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', height: isMobile ? 'auto' : 'calc(100vh - 52px)' }}>
+        <div style={{ display: 'flex', height: 'calc(100vh - 52px)' }}>
 
-          {/* Map — top on mobile */}
-          <div style={{ order: isMobile ? 1 : 2, flex: isMobile ? 'none' : 1, height: isMobile ? '55vw' : '100%', minHeight: isMobile ? 240 : 'auto' }}>
-            <MapView friends={results.friends} venues={results.venues} midpoint={results.centroid} selectedVenueIndex={selectedVenueIndex} routes={routes} />
-          </div>
-
-          {/* Sidebar — below map on mobile */}
-          <div style={{ order: isMobile ? 2 : 1, width: isMobile ? '100%' : 360, flexShrink: 0, overflowY: isMobile ? 'visible' : 'auto', borderRight: isMobile ? 'none' : '1px solid #E0D8CC', borderTop: isMobile ? '1px solid #E0D8CC' : 'none',
+          {/* Sidebar */}
+          <div style={{ width: 360, flexShrink: 0, overflowY: 'auto', borderRight: '1px solid #E0D8CC',
             padding: '18px 16px', background: '#F5F0E8' }}>
 
             {/* Crew */}
@@ -617,7 +497,7 @@ export default function App() {
 
             {/* Venue cards */}
             {results.venues.map((v, i) => (
-              <div key={i} onClick={() => selectVenue(i)} style={{ ...card, marginBottom: 12, cursor: "pointer",
+              <div key={i} style={{ ...card, marginBottom: 12,
                 border: `1px solid ${i === 0 ? 'rgba(193,123,47,0.4)' : '#E0D8CC'}` }}>
                 {v.photo && (
                   <div style={{ height: 100, overflow: 'hidden', position: 'relative', borderRadius: '10px 10px 0 0' }}>
@@ -693,9 +573,12 @@ export default function App() {
             </button>
           </div>
 
+          {/* Map */}
+          <div style={{ flex: 1 }}>
+            <MapView friends={results.friends} venues={results.venues} midpoint={results.centroid} />
+          </div>
         </div>
       )}
     </div>
   );
 }
-
