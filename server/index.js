@@ -45,7 +45,7 @@ app.get('/api/places', async (req, res) => {
   const { query, lat, lng } = req.query;
   if (!query || !lat || !lng) return res.status(400).json({ error: 'query, lat, lng required' });
   try {
-    const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query + ' New York City')}&location=${lat},${lng}&radius=2500&key=${GMAPS_KEY}`;
+    const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query + ' New York City')}&location=${lat},${lng}&radius=1200&key=${GMAPS_KEY}`;
     const data = await fetch(url).then(r => r.json());
     res.json({ results: (data.results || []).slice(0, 5) });
   } catch (e) {
@@ -163,7 +163,7 @@ Rank them using a COMBINED SCORE that weighs three factors:
 2. FAIRNESS (35%) — how equal the travel times are across the group (minimize the gap between longest and shortest)
 3. QUALITY (15%) — Google rating (higher is better)
 
-The top result should be the best overall spot — not just the most equal one.
+The top result should minimize total travel time above all else. Venues where ANY person travels more than 20 minutes should be heavily penalized. Prefer venues where everyone travels under 15 minutes.
 Return ONLY valid JSON:
 {
   "midpoint_neighborhood": "Neighborhood Name",
