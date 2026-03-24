@@ -101,18 +101,6 @@ function AddressInput({ value, onChange, onSelect, placeholder, color }) {
   const inputRef = useRef(null);
   const debounce = useRef(null);
 
-  // Position dropdown relative to input using fixed positioning — escapes all stacking contexts
-  const updateDropdownPosition = () => {
-    if (!inputRef.current) return;
-    const rect = inputRef.current.getBoundingClientRect();
-    setDropdownStyle({
-      position: 'fixed',
-      top: rect.bottom + 4,
-      left: rect.left,
-      width: rect.width + 60,
-      zIndex: 999999,
-    });
-  };
 
   const handleChange = (e) => {
     const v = e.target.value;
