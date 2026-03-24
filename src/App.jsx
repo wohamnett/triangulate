@@ -148,8 +148,8 @@ function AddressInput({ value, onChange, onSelect, placeholder, color }) {
 
   // Portal dropdown rendered directly into document.body
   const dropdown = open && suggestions.length > 0
-    ? ReactDOM.createPortal(
-        <div style={{ ...dropdownStyle, background: '#FDFAF5', border: '1px solid #D4CCC0',
+    ? (
+        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, zIndex: 9999, background: '#FDFAF5', border: '1px solid #D4CCC0',
           borderRadius: 8, overflow: 'hidden', boxShadow: '0 8px 24px rgba(0,0,0,0.15)' }}>
           {suggestions.map((s, i) => (
             <div key={s.place_id || i}
@@ -173,9 +173,7 @@ function AddressInput({ value, onChange, onSelect, placeholder, color }) {
             fontSize: 8, color: '#C8C0B0', textAlign: 'right', letterSpacing: '0.05em' }}>
             powered by Google
           </div>
-        </div>,
-        document.body
-      )
+        </div>
     : null;
 
   return (
@@ -185,7 +183,7 @@ function AddressInput({ value, onChange, onSelect, placeholder, color }) {
           ref={inputRef}
           value={query}
           onChange={handleChange}
-          onFocus={() => { if (suggestions.length > 0) { updateDropdownPosition(); setOpen(true); } }}
+          onFocus={() => { if (suggestions.length > 0) { setOpen(true); } }}
           onBlur={() => setTimeout(() => setOpen(false), 180)}
           placeholder={placeholder}
           style={{ flex: 1, background: 'none', border: 'none', outline: 'none',
