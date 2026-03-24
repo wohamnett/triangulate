@@ -32,7 +32,7 @@ app.get('/api/autocomplete', async (req, res) => {
   const { input } = req.query;
   if (!input) return res.status(400).json({ error: 'input required' });
   try {
-    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(input)}&components=country:us&location=40.7128,-74.0060&radius=40000&types=establishment|geocode&key=${GMAPS_KEY}`;
+    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(input)}&components=country:us&types=establishment|geocode&key=${GMAPS_KEY}`;
     const data = await fetch(url).then(r => r.json());
     res.json({ predictions: data.predictions || [] });
   } catch (e) {
@@ -45,7 +45,7 @@ app.get('/api/places', async (req, res) => {
   const { query, lat, lng } = req.query;
   if (!query || !lat || !lng) return res.status(400).json({ error: 'query, lat, lng required' });
   try {
-    const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query + ' New York City')}&location=${lat},${lng}&radius=1200&key=${GMAPS_KEY}`;
+    const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&location=${lat},${lng}&radius=1500&key=${GMAPS_KEY}`;
     const data = await fetch(url).then(r => r.json());
     res.json({ results: (data.results || []).slice(0, 5) });
   } catch (e) {

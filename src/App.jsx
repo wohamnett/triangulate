@@ -97,7 +97,7 @@ function AddressInput({ value, onChange, onSelect, placeholder, color }) {
   const [suggestions, setSuggestions] = useState([]);
   const [open, setOpen] = useState(false);
   const [fetching, setFetching] = useState(false);
-  const [dropdownStyle, setDropdownStyle] = useState({});
+  
   const inputRef = useRef(null);
   const debounce = useRef(null);
 
@@ -125,7 +125,7 @@ function AddressInput({ value, onChange, onSelect, placeholder, color }) {
       try {
         const preds = await api.autocomplete(v);
         setSuggestions(preds.slice(0, 5));
-        if (preds.length > 0) { updateDropdownPosition(); setOpen(true); }
+        if (preds.length > 0) { setOpen(true); }
         else setOpen(false);
       } catch { setSuggestions([]); }
       finally { setFetching(false); }
@@ -179,7 +179,7 @@ function AddressInput({ value, onChange, onSelect, placeholder, color }) {
     : null;
 
   return (
-    <div style={{ flex: 1 }}>
+    <div style={{ flex: 1, position: 'relative' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
         <input
           ref={inputRef}
