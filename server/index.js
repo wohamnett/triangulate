@@ -155,7 +155,7 @@ ${friendList}
 
 They want: ${resolvedLabel}
 
-Here are real nearby venues (from Google Places) near the geographic midpoint:
+Here are real nearby venues (from Google Places) near the geographic midpoint:${refinement ? "\n\nUSER REFINEMENT: re-rank these prioritizing \"" + refinement + "\". Venues matching this vibe should rank higher." : ""}
 ${refinement ? `\nUSER REFINEMENT REQUEST: The user has asked to prioritize: "${refinement}". Re-rank these venues with this preference as an additional strong factor. If no venues match well, rank the closest matches first.\n` : ''}
 ${placesList}
 
