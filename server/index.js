@@ -186,4 +186,5 @@ Include all venues in ranked order. Use exact venue names from the list above.`;
   }
 });
 
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, '0.0.0.0', () => console.log('Triangulate running on port ' + PORT));
