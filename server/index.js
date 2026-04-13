@@ -186,5 +186,10 @@ Include all venues in ranked order. Use exact venue names from the list above.`;
   }
 });
 
+const path = require('path');
 const PORT = process.env.PORT || 3001;
+if (process.env.NODE_ENV === 'production') {
+  app.use(require('express').static(path.join(__dirname, '../dist')));
+  app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../dist/index.html')));
+}
 app.listen(PORT, '0.0.0.0', () => console.log('Triangulate running on port ' + PORT));
