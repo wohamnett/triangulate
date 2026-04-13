@@ -144,9 +144,13 @@ app.post('/api/recommend', async (req, res) => {
     `- ${f.name}: ${f.address} (${f.coords.lat.toFixed(4)}, ${f.coords.lng.toFixed(4)})`
   ).join('\n');
 
-  const placesList = resolvedPlaces?.map((p, i) =>
-    `${i+1}. ${p.name} at ${p.address} (${p.coords.lat.toFixed(4)}, ${p.coords.lng.toFixed(4)}) — rated ${p.rating}, ${p.isOpen ? 'open now' : 'hours unknown'}`
-  ).join('\n') || 'No places provided';
+  const placesList = resolvedPlaces?.map((p, i) => {
+    const lat = p.coords?.lat ?? p.lat ?? '?';
+    const lng = p.coords?.lng ?? p.lng ?? '?';
+    const latStr = typeof lat === 'number' ? lat.toFixed(4) : lat;
+    const lngStr = typeof lng === 'number' ? lng.toFixed(4) : lng;
+    return `${i+1}. ${p.name} at ${p.address || p.vicinity || ''} (${latStr}, ${lngStr}) — rated ${p.rating || 'N/A'}`;
+  }).join('\n') || 'No places provided';
 
   const prompt = `You are a NYC transit expert. A group of friends want to meet up.
 
