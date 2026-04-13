@@ -135,73 +135,47 @@ app.post('/api/distances', async (req, res) => {
 
 // ── Claude AI for midpoint reasoning ─────────────────────────────────────────
 app.post('/api/recommend', async (req, res) => {
-  const { friends, venueLabel, places, venues, travel_times, refinement } = req.body;
+  const { friends, venueLabel, places, venues, refinement } = req.body;
   const resolvedPlaces = places || venues || [];
-  const resolvedLabel = venueLabel || 'a good meetup spot';
+  const resolvedLabel = venueLabel || 'a great meetup spot';
   if (!friends) return res.status(400).json({ error: 'friends required' });
 
   const friendList = friends.map(f =>
-    `- ${f.name}: ${f.address} (${f.coords.lat.toFixed(4)}, ${f.coords.lng.toFixed(4)})`
+    `- ${f.name}: ${f.address} (${f.coords?.lat?.toFixed(4)}, ${f.coords?.lng?.toFixed(4)})`
   ).join('\n');
 
-  const placesList = resolvedPlaces?.map((p, i) => {
-    const lat = p.coords?.lat ?? p.lat ?? '?';
-    const lng = p.coords?.lng ?? p.lng ?? '?';
+  const placesList = resolvedPlaces.map((p, i) => {
+    const lat = p.coords?.lat ?? '?';
+    const lng = p.coords?.lng ?? '?';
     const latStr = typeof lat === 'number' ? lat.toFixed(4) : lat;
     const lngStr = typeof lng === 'number' ? lng.toFixed(4) : lng;
     return `${i+1}. ${p.name} at ${p.address || p.vicinity || ''} (${latStr}, ${lngStr}) — rated ${p.rating || 'N/A'}`;
   }).join('\n') || 'No places provided';
 
-  const prompt = `You are a NYC transit expert. A group of friends want to meet up.
+  const refinementLine = refinement ? `\nUSER PREFERENCE: Re-rank these venues prioritizing "${refinement}". Venues matching this vibe should rank higher.\n` : '';
 
-Friends and exact locations:
+  const prompt = `You are a NYC local expert. A group of friends want to meet up in NYC.
+
+Friends and locations:
 ${friendList}
 
 They want: ${resolvedLabel}
-
-Here are real nearby venues (from Google Places) near the geographic midpoint:${refinement ? "\n\nUSER REFINEMENT: re-rank these prioritizing \"" + refinement + "\". Venues matching this vibe should rank higher." : ""}
-${refinement ? `\nUSER REFINEMENT REQUEST: The user has asked to prioritize: "${refinement}". Re-rank these venues with this preference as an additional strong factor. If no venues match well, rank the closest matches first.\n` : ''}
+${refinementLine}
+Venues to rank:
 ${placesList}
 
-For each venue, calculate realistic NYC subway transit times from each friend's location.
+Rank these venues by how well they work as a meetup spot considering travel fairness and the user's preferences.
 
-Rank them purely by TOTAL travel time across all friends. The venue where everyone's times ADD UP to the least is #1. Simple as that.
+Return ONLY a JSON array like this (no other text):
+{"ranked": [{"name": "Venue Name", "reason": "brief reason"}, ...]}
 
-Tie-break only: if total times are within 2 minutes of each other, prefer the option with the smallest gap between fastest and slowest traveller.
-
-NEVER rank a venue higher if it has any single journey over 25 minutes when a better total-time option exists.
-
-Old scoring (ignore):
-3. QUALITY (15%) — Google rating (higher is better)
-
-The top result should minimize total travel time above all else. Venues where ANY person travels more than 20 minutes should be heavily penalized. Prefer venues where everyone travels under 15 minutes.
-Return ONLY valid JSON:
-{
-  "midpoint_neighborhood": "Neighborhood Name",
-  "midpoint_reason": "One sentence why this is fair",
-  "venues": [
-    {
-      "index": 0,
-      "combined_score": 91,
-      "fairness": 88,
-      "fairness_reason": "Only 4 min difference between closest and furthest person",
-      "recommendation_reason": "Best blend of fairness, short commutes, and high rating",
-      "travel_times": [
-        { "person": "Name", "minutes": 18, "mode": "subway", "route": "Take the F to 14th St" }
-      ]
-    }
-  ]
-}`;
+Include all venues in ranked order. Use exact venue names from the list above.`;
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        messages: [{ role: 'user', content: prompt }],
-      }),
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] }),
     });
     const data = await response.json();
     const text = data.content?.map(b => b.text || '').join('') || '';
@@ -212,10 +186,4 @@ Return ONLY valid JSON:
   }
 });
 
-const path = require('path');
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../dist')));
-  app.get('*', (req, res) => { if (!req.path.startsWith('/api')) res.sendFile(path.join(__dirname, '../dist/index.html')); });
-}
-const PORT = process.env.PORT || 3001;
 app.listen(PORT, '0.0.0.0', () => console.log('Triangulate running on port ' + PORT));
