@@ -135,14 +135,16 @@ app.post('/api/distances', async (req, res) => {
 
 // ── Claude AI for midpoint reasoning ─────────────────────────────────────────
 app.post('/api/recommend', async (req, res) => {
-  const { friends, venueLabel, places } = req.body;
-  if (!friends || !venueLabel) return res.status(400).json({ error: 'friends and venueLabel required' });
+  const { friends, venueLabel, places, venues, travel_times, refinement } = req.body;
+  const resolvedPlaces = places || venues || [];
+  const resolvedLabel = venueLabel || 'a good meetup spot';
+  if (!friends) return res.status(400).json({ error: 'friends required' });
 
   const friendList = friends.map(f =>
     `- ${f.name}: ${f.address} (${f.coords.lat.toFixed(4)}, ${f.coords.lng.toFixed(4)})`
   ).join('\n');
 
-  const placesList = places?.map((p, i) =>
+  const placesList = resolvedPlaces?.map((p, i) =>
     `${i+1}. ${p.name} at ${p.address} (${p.coords.lat.toFixed(4)}, ${p.coords.lng.toFixed(4)}) — rated ${p.rating}, ${p.isOpen ? 'open now' : 'hours unknown'}`
   ).join('\n') || 'No places provided';
 
@@ -151,9 +153,10 @@ app.post('/api/recommend', async (req, res) => {
 Friends and exact locations:
 ${friendList}
 
-They want: ${venueLabel}
+They want: ${resolvedLabel}
 
 Here are real nearby venues (from Google Places) near the geographic midpoint:
+${refinement ? `\nUSER REFINEMENT REQUEST: The user has asked to prioritize: "${refinement}". Re-rank these venues with this preference as an additional strong factor. If no venues match well, rank the closest matches first.\n` : ''}
 ${placesList}
 
 For each venue, calculate realistic NYC subway transit times from each friend's location.

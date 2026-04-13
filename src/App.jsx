@@ -304,6 +304,8 @@ export default function App() {
   const [step, setStep]             = useState('setup');
   const [selectedVenueIndex, setSelectedVenueIndex] = useState(0);
   const [routes, setRoutes] = useState([]);
+  const [refineMsg, setRefineMsg] = useState('');
+  const [refineLoading, setRefineLoading] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
@@ -318,6 +320,34 @@ export default function App() {
   const updateFriend = (id, field, val) => setFriends(f => f.map(x => x.id === id ? { ...x, [field]: val } : x));
   const setCoords    = (id, coords, label) => setFriends(f => f.map(x => x.id === id ? { ...x, coords, address: label || x.address } : x));
   const reset = () => { setStep('setup'); setResults(null); setError(null); setSelectedVenueIndex(0); setRoutes([]); };
+
+  const refineSearch = async () => {
+    if (!refineMsg.trim() || refineLoading) return;
+    setRefineLoading(true);
+    try {
+      const res = await fetch('/api/recommend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          venues: results.venues,
+          travel_times: results.travel_times,
+          friends: results.friends,
+          refinement: refineMsg.trim(),
+        })
+      });
+      const data = await res.json();
+      if (data.ranked) {
+        const reranked = data.ranked.map(r => results.venues.find(v => v.place_id === r.place_id || v.name === r.name)).filter(Boolean);
+        if (reranked.length > 0) {
+          setResults(prev => ({ ...prev, venues: reranked }));
+          setSelectedVenueIndex(0);
+          setRoutes([]);
+        }
+      }
+    } catch(e) { console.error(e); }
+    setRefineLoading(false);
+    setRefineMsg('');
+  };
 
   const selectVenue = (i) => {
     setSelectedVenueIndex(i);
@@ -683,6 +713,27 @@ export default function App() {
             }}>
               ← search again
             </button>
+          </div>
+
+          {/* Refine results */}
+          <div style={{ marginTop: 16, borderTop: '1px solid #E0D8CC', paddingTop: 14 }}>
+            <div style={{ fontSize: 10, fontFamily: "'DM Mono', monospace", color: '#B8A898', letterSpacing: '0.08em', marginBottom: 8, textTransform: 'uppercase' }}>refine results</div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input
+                value={refineMsg}
+                onChange={e => setRefineMsg(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && refineSearch()}
+                placeholder="e.g. outdoor space, divey bar..."
+                style={{ flex: 1, fontSize: 12, fontFamily: "'DM Mono', monospace", background: '#FDFAF5',
+                  border: '1px solid #D4CCC0', borderRadius: 6, padding: '7px 10px', outline: 'none', color: '#2a2520' }}
+              />
+              <button onClick={refineSearch} disabled={refineLoading || !refineMsg.trim()}
+                style={{ background: refineLoading || !refineMsg.trim() ? '#E0D8CC' : '#C17B2F',
+                  color: 'white', border: 'none', borderRadius: 6, padding: '7px 14px',
+                  cursor: refineLoading || !refineMsg.trim() ? 'default' : 'pointer', fontSize: 14, fontWeight: 700 }}>
+                {refineLoading ? '⏳' : '🎲'}
+              </button>
+            </div>
           </div>
 
         </div>
