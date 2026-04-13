@@ -161,9 +161,13 @@ ${placesList}
 
 For each venue, calculate realistic NYC subway transit times from each friend's location.
 
-Rank them using a COMBINED SCORE that weighs three factors:
-1. PROXIMITY (50%) — minimize total and average travel time for all parties (shorter is better)
-2. FAIRNESS (35%) — how equal the travel times are across the group (minimize the gap between longest and shortest)
+Rank them purely by TOTAL travel time across all friends. The venue where everyone's times ADD UP to the least is #1. Simple as that.
+
+Tie-break only: if total times are within 2 minutes of each other, prefer the option with the smallest gap between fastest and slowest traveller.
+
+NEVER rank a venue higher if it has any single journey over 25 minutes when a better total-time option exists.
+
+Old scoring (ignore):
 3. QUALITY (15%) — Google rating (higher is better)
 
 The top result should minimize total travel time above all else. Venues where ANY person travels more than 20 minutes should be heavily penalized. Prefer venues where everyone travels under 15 minutes.

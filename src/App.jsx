@@ -329,20 +329,25 @@ export default function App() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          venues: results.venues,
-          travel_times: results.travel_times,
           friends: results.friends,
+          venueLabel: refineMsg.trim(),
+          places: results.venues,
           refinement: refineMsg.trim(),
         })
       });
       const data = await res.json();
-      if (data.ranked) {
-        const reranked = data.ranked.map(r => results.venues.find(v => v.place_id === r.place_id || v.name === r.name)).filter(Boolean);
-        if (reranked.length > 0) {
-          setResults(prev => ({ ...prev, venues: reranked }));
-          setSelectedVenueIndex(0);
-          setRoutes([]);
-        }
+      if (data.ranked && data.ranked.length > 0) {
+        const reranked = data.ranked.map(r => {
+          return results.venues.find(v =>
+            v.place_id === r.place_id ||
+            v.name === r.name ||
+            (r.name && v.name && v.name.toLowerCase().includes(r.name.toLowerCase().substring(0,8)))
+          );
+        }).filter(Boolean);
+        const finalList = reranked.length >= 2 ? reranked : results.venues;
+        setResults(prev => ({ ...prev, venues: finalList }));
+        setSelectedVenueIndex(0);
+        setRoutes([]);
       }
     } catch(e) { console.error(e); }
     setRefineLoading(false);
