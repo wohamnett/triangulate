@@ -179,6 +179,7 @@ Include all venues in ranked order. Use exact venue names from the list above.`;
     });
     const data = await response.json();
     const text = data.content?.map(b => b.text || '').join('') || '';
+    console.log('Anthropic raw response:', JSON.stringify(data).substring(0, 200));
     const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
     res.json(parsed);
   } catch (e) {
