@@ -692,7 +692,7 @@ export default function App() {
 
                   {/* Travel times */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: v.website ? 8 : 0 }}>
-                    {v.travel_times.map((t, j) => (
+                    {(v.travel_times||[]).map((t, j) => (
                       <div key={j} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         <div style={{ width: 5, height: 5, borderRadius: '50%', background: LIGHT_COLORS[j % LIGHT_COLORS.length], flexShrink: 0 }} />
                         <span style={{ fontSize: 10, color: '#7a7060', width: 50, flexShrink: 0 }}>{t.person}</span>
