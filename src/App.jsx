@@ -670,6 +670,14 @@ export default function App() {
           <div style={{ order: isMobile ? 2 : 1, width: isMobile ? '100%' : 360, flexShrink: 0, overflowY: isMobile ? 'visible' : 'auto', borderRight: isMobile ? 'none' : '1px solid #E0D8CC', borderTop: isMobile ? '1px solid #E0D8CC' : 'none',
             padding: '18px 16px', background: '#f5f3ff' }}>
 
+            {/* Midpoint */}
+            <div style={{ marginBottom: 12, padding: '10px 14px', background: 'rgba(124,58,237,0.06)',
+              borderRadius: 10, border: '1px solid rgba(124,58,237,0.2)' }}>
+              <div style={{ fontSize: 8, color: '#7c3aed', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 3 }}>meeting point</div>
+              <div style={{ fontSize: 15, color: '#1e1b4b', fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 800 }}>{results.midpoint}</div>
+              {results.midpoint_reason && <div style={{ fontSize: 10, color: '#8b5cf6', marginTop: 4, lineHeight: 1.5 }}>{results.midpoint_reason}</div>}
+            </div>
+
             {/* Crew */}
             <div style={{ ...card, marginBottom: 12, padding: '10px 14px' }}>
               <div style={{ fontSize: 8, color: '#a78bfa', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 8 }}>the crew</div>
@@ -781,92 +789,11 @@ export default function App() {
             </div>
           </div>
 
-            <div style={{ fontSize: 8, color: '#a78bfa', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 12 }}>
-              {selectedVenue.icon} top spots · best match first
-            </div>
-
-            {/* Venue cards */}
-            {results.venues.map((v, i) => (
-              <div key={i} onClick={() => selectVenue(i)} style={{ ...card, marginBottom: 12, cursor: "pointer",
-                border: `1px solid ${i === 0 ? 'rgba(124,58,237,0.4)' : '#ddd6fe'}` }}>
-                {v.photo && (
-                  <div style={{ height: 100, overflow: 'hidden', position: 'relative', borderRadius: '10px 10px 0 0' }}>
-                    <img src={v.photo} alt={v.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      onError={e => e.target.parentElement.style.display = 'none'} />
-                    {i === 0 && <div style={{ position: 'absolute', top: 8, left: 8, background: '#7c3aed',
-                      color: 'white', fontSize: 8, fontWeight: 800, padding: '3px 8px', borderRadius: 4,
-                      fontFamily: "'Inter', system-ui, sans-serif", letterSpacing: '0.1em' }}>★ TOP PICK</div>}
-                    {v.isOpen !== null && (
-                      <div style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(245,243,255,0.9)',
-                        padding: '3px 8px', borderRadius: 4, fontSize: 9,
-                        color: v.isOpen ? '#2E7D52' : '#7c3aed', border: `1px solid ${v.isOpen ? '#2E7D52' : '#7c3aed'}` }}>
-                        {v.isOpen ? 'Open now' : 'Closed'}
-                      </div>
-                    )}
-                  </div>
-                )}
-                <div style={{ padding: '12px 14px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 3 }}>
-                    <div style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 800, fontSize: 13, color: '#1e1b4b', lineHeight: 1.2, paddingRight: 8 }}>{v.name}</div>
-                    {v.rating && <span style={{ fontSize: 11, color: '#7c3aed', flexShrink: 0, fontWeight: 600 }}>★ {v.rating}</span>}
-                  </div>
-                  <div style={{ fontSize: 10, color: '#8b5cf6', marginBottom: 6, lineHeight: 1.4 }}>{v.address}</div>
-                  {v.recommendation_reason && <div style={{ fontSize: 11, color: '#4c1d95', marginBottom: 8, lineHeight: 1.5 }}>{v.recommendation_reason}</div>}
-
-                  {/* Score bar */}
-                  <div style={{ marginBottom: 10 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-                      <span style={{ fontSize: 8, color: '#a78bfa', letterSpacing: '0.1em', textTransform: 'uppercase' }}>match score</span>
-                      <span style={{ fontSize: 10 }}>
-                        <span style={{ color: (v.combined_score||0) >= 80 ? '#2E7D52' : (v.combined_score||0) >= 60 ? '#7c3aed' : '#7c3aed', fontWeight: 600 }}>{v.combined_score ?? '—'}%</span>
-                        <span style={{ color: '#c4b5fd', fontSize: 9 }}> · {v.fairness ?? '—'}% fair</span>
-                      </span>
-                    </div>
-                    <div style={{ height: 3, background: '#ede9fe', borderRadius: 2 }}>
-                      <div style={{ height: '100%', width: `${v.combined_score}%`, borderRadius: 2,
-                        background: v.combined_score >= 80 ? '#2E7D52' : v.combined_score >= 60 ? '#7c3aed' : '#7c3aed' }} />
-                    </div>
-                  </div>
-
-                  {/* Travel times */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: v.website ? 8 : 0 }}>
-                    {(v.travel_times||[]).map((t, j) => (
-                      <div key={j} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <div style={{ width: 5, height: 5, borderRadius: '50%', background: LIGHT_COLORS[j % LIGHT_COLORS.length], flexShrink: 0 }} />
-                        <span style={{ fontSize: 10, color: '#6d28d9', width: 50, flexShrink: 0 }}>{t.person}</span>
-                        <span style={{ fontSize: 10, fontFamily: "'DM Mono'", color: t.minutes ? '#1e1b4b' : '#c4b5fd', width: 30, flexShrink: 0 }}>{t.minutes ? `${t.minutes}m` : '—'}</span>
-                        <span style={{ fontSize: 9, color: '#6d28d9', display: 'flex', gap: 3, flexWrap: 'wrap', alignItems: 'center' }}>
-                          {routes[j]?.steps?.length ? routes[j].steps.map((s, si) => (
-                            <span key={si} style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                              {si > 0 && <span style={{ color: '#c4b5fd' }}>›</span>}
-                              <span>{s.mode === 'WALKING' ? '🚶' : s.vehicle === 'SUBWAY' ? '🚇' : s.vehicle === 'BUS' ? '🚌' : '🚆'}</span>
-                              {s.line && <span style={{ fontSize: 8, background: '#1e1b4b', color: 'white', borderRadius: 3, padding: '1px 4px' }}>{s.line}</span>}
-                              <span style={{ fontSize: 9 }}>{s.duration}</span>
-                            </span>
-                          )) : t.route ? <span>{t.route}</span> : <span>🚇</span>}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {v.website && (
-                    <a href={v.website} target="_blank" rel="noreferrer"
-                      style={{ display: 'inline-block', fontSize: 10, color: '#2E6BA8', textDecoration: 'none' }}>
-                      → visit website
-                    </a>
-                  )}
-                </div>
-              </div>
-            ))}
-
-            {/* Midpoint */}
-            <div style={{ marginBottom: 12, padding: '10px 14px', background: 'rgba(124,58,237,0.06)',
-              borderRadius: 10, border: '1px solid rgba(124,58,237,0.2)' }}>
-              <div style={{ fontSize: 8, color: '#7c3aed', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 3 }}>meeting point</div>
-              <div style={{ fontSize: 15, color: '#1e1b4b', fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 800 }}>{results.midpoint}</div>
-              {results.midpoint_reason && <div style={{ fontSize: 10, color: '#8b5cf6', marginTop: 4, lineHeight: 1.5 }}>{results.midpoint_reason}</div>}
-            </div>
-
+        </div>
+      )}
+    </div>
+  );
+}
             {/* Search again button */}
             <button onClick={reset} style={{
               width: '100%', padding: '12px', marginTop: 4, marginBottom: 8,
@@ -879,8 +806,3 @@ export default function App() {
             </button>
           </div>
 
-        </div>
-      )}
-    </div>
-  );
-}
