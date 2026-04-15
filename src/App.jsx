@@ -518,7 +518,7 @@ export default function App() {
   const card = { background: '#f5f3ff', border: '1px solid #E0D8CC', borderRadius: 10 };
 
   return (
-    <div style={{ fontFamily: "'DM Mono', monospace", minHeight: '100vh', background: '#F5F0E8', color: '#1e1b4b' }}>
+    <div style={{ fontFamily: "'DM Mono', monospace", minHeight: '100vh', background: '#f5f3ff', color: '#1e1b4b' }}>
 
       {/* Header */}
       <div style={{ background: '#f5f3ff', borderBottom: '1px solid #E0D8CC', padding: '14px 28px',
@@ -636,7 +636,7 @@ export default function App() {
 
           <button onClick={findMeetup} disabled={loading} style={{
             width: '100%', padding: '14px',
-            background: loading ? '#ede9fe' : 'linear-gradient(135deg, #C17B2F, #B84A32)',
+            background: loading ? '#ede9fe' : 'linear-gradient(135deg, #7c3aed, #6d28d9)',
             border: 'none', borderRadius: 8,
             color: loading ? '#a78bfa' : 'white', fontSize: 13, fontWeight: 700,
             cursor: loading ? 'not-allowed' : 'pointer',
@@ -668,7 +668,7 @@ export default function App() {
 
           {/* Sidebar — below map on mobile */}
           <div style={{ order: isMobile ? 2 : 1, width: isMobile ? '100%' : 360, flexShrink: 0, overflowY: isMobile ? 'visible' : 'auto', borderRight: isMobile ? 'none' : '1px solid #E0D8CC', borderTop: isMobile ? '1px solid #E0D8CC' : 'none',
-            padding: '18px 16px', background: '#F5F0E8' }}>
+            padding: '18px 16px', background: '#f5f3ff' }}>
 
             {/* Crew */}
             <div style={{ ...card, marginBottom: 12, padding: '10px 14px' }}>
