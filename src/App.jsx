@@ -778,8 +778,6 @@ export default function App() {
             }}>
               ← search again
             </button>
-          </div>
-
           {/* Refine results */}
           <div style={{ marginTop: 16, borderTop: '1px solid #E0D8CC', paddingTop: 14 }}>
             <div style={{ fontSize: 10, fontFamily: "'DM Mono', monospace", color: '#a78bfa', letterSpacing: '0.08em', marginBottom: 8, textTransform: 'uppercase' }}>refine results</div>
@@ -799,6 +797,8 @@ export default function App() {
                 {refineLoading ? '⏳' : '🎲'}
               </button>
             </div>
+          </div>
+
           </div>
 
         </div>
