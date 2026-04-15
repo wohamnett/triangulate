@@ -259,7 +259,7 @@ function MapView({ friends, venues, midpoint, selectedVenueIndex, routes }) {
               <Popup>
                 <b style={{ color }}>{v.name}</b><br />
                 <span style={{ color: '#666' }}>{v.address}</span><br />
-                <span style={{ color: '#888' }}>★ {v.rating} · {v.fairness}% fair · {v.isOpen ? '🟢 Open' : '🔴 Closed'}</span>
+                <span style={{ color: '#888' }}>★ {v.rating} · {v.fairness ?? '—'}% fair · {v.isOpen ? '🟢 Open' : '🔴 Closed'}</span>
               </Popup>
             </Marker>
           );
@@ -680,8 +680,8 @@ export default function App() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
                       <span style={{ fontSize: 8, color: '#B8A898', letterSpacing: '0.1em', textTransform: 'uppercase' }}>match score</span>
                       <span style={{ fontSize: 10 }}>
-                        <span style={{ color: v.combined_score >= 80 ? '#2E7D52' : v.combined_score >= 60 ? '#C17B2F' : '#B84A32', fontWeight: 600 }}>{v.combined_score}%</span>
-                        <span style={{ color: '#C8C0B0', fontSize: 9 }}> · {v.fairness}% fair</span>
+                        <span style={{ color: (v.combined_score||0) >= 80 ? '#2E7D52' : (v.combined_score||0) >= 60 ? '#C17B2F' : '#B84A32', fontWeight: 600 }}>{v.combined_score ?? '—'}%</span>
+                        <span style={{ color: '#C8C0B0', fontSize: 9 }}> · {v.fairness ?? '—'}% fair</span>
                       </span>
                     </div>
                     <div style={{ height: 3, background: '#EDE8DF', borderRadius: 2 }}>
