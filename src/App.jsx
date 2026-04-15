@@ -360,7 +360,7 @@ export default function App() {
       const scoredVenues = newVenues.map((v, vi) => {
         const travel_times = friends.map((f, fi) => {
           const el = distRes?.rows?.[fi]?.elements?.[vi];
-          return el?.status === 'OK' ? { minutes: Math.round(el.duration.value / 60), text: el.duration.text } : { minutes: null, text: '—' };
+          return el?.status === 'OK' ? { minutes: Math.round(el.duration.value / 60), text: el.duration.text, person: f.name } : { minutes: null, text: '—', person: f.name };
         });
         const valid = travel_times.filter(t => t.minutes !== null);
         const avg = valid.length ? valid.reduce((s, t) => s + t.minutes, 0) / valid.length : null;
