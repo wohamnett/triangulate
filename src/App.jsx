@@ -174,7 +174,7 @@ function AddressInput({ value, onChange, onSelect, placeholder, color }) {
           onBlur={() => setTimeout(() => setOpen(false), 180)}
           placeholder={placeholder}
           style={{ flex: 1, background: 'none', border: 'none', outline: 'none',
-            color: '#1e1b4b', fontSize: 12, fontFamily: "'DM Mono', monospace" }}
+            color: '#1e1b4b', fontSize: 16, fontFamily: "'DM Mono', monospace" }}
         />
         {fetching && <span style={{ fontSize: 9, color: '#a78bfa', animation: 'spin 1s linear infinite', display: 'inline-block' }}>◌</span>}
       </div>
@@ -789,7 +789,7 @@ export default function App() {
                 onChange={e => setRefineMsg(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && refineSearch()}
                 placeholder="e.g. outdoor space, divey bar..."
-                style={{ flex: 1, fontSize: 12, fontFamily: "'DM Mono', monospace", background: '#f5f3ff',
+                style={{ flex: 1, fontSize: 16, fontFamily: "'DM Mono', monospace", background: '#f5f3ff',
                   border: '1px solid #D4CCC0', borderRadius: 6, padding: '7px 10px', outline: 'none', color: '#1e1b4b' }}
               />
               <button onClick={refineSearch} disabled={refineLoading || !refineMsg.trim()}
