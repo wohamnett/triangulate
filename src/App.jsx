@@ -327,7 +327,15 @@ export default function App() {
     try {
       const midpoint = results.centroid;
       // Search Google Places for new venues matching the refinement query
-      const newVenues = await api.places(refineMsg.trim(), midpoint.lat, midpoint.lng);
+      const rawVenues = await api.places(refineMsg.trim(), midpoint.lat, midpoint.lng);
+      const newVenues = rawVenues.map(p => ({
+        name: p.name,
+        address: p.formatted_address || p.vicinity || '',
+        coords: { lat: p.geometry?.location?.lat, lng: p.geometry?.location?.lng },
+        rating: p.rating,
+        place_id: p.place_id,
+        isOpen: p.opening_hours?.open_now,
+      })).filter(p => p.coords?.lat);
       if (newVenues.length === 0) { setRefineLoading(false); setRefineMsg(''); return; }
       // Rank them by travel fairness via server
       const res = await fetch('/api/recommend', {
