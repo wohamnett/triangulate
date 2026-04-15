@@ -335,6 +335,9 @@ export default function App() {
         place_id: p.place_id,
         isOpen: p.opening_hours?.open_now ?? null,
         travel_times: [],
+        photo: p.photos?.[0]?.photo_reference
+          ? `/api/photo?ref=${p.photos[0].photo_reference}`
+          : null,
       })).filter(p => p.coords?.lat);
       if (newVenues.length === 0) { setRefineLoading(false); setRefineMsg(''); return; }
       // Rank via server
