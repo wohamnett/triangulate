@@ -325,26 +325,34 @@ export default function App() {
     if (!refineMsg.trim() || refineLoading) return;
     setRefineLoading(true);
     try {
+      const midpoint = results.centroid;
+      // Search Google Places for new venues matching the refinement query
+      const newVenues = await api.places(refineMsg.trim(), midpoint.lat, midpoint.lng);
+      if (newVenues.length === 0) { setRefineLoading(false); setRefineMsg(''); return; }
+      // Rank them by travel fairness via server
       const res = await fetch('/api/recommend', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           friends: results.friends,
-          venues: results.venues,
+          venues: newVenues,
           venueLabel: refineMsg.trim(),
-          refinement: refineMsg.trim(),
         }),
       });
       const data = await res.json();
-      if (data.ranked && data.ranked.length > 0) {
-        const reranked = data.ranked.map(r =>
-          results.venues.find(v => v.name === r.name || (r.name && v.name && v.name.toLowerCase().includes(r.name.toLowerCase().substring(0,8))))
-        ).filter(Boolean);
-        if (reranked.length >= 2) {
-          setResults(prev => ({ ...prev, venues: reranked }));
-          setSelectedVenueIndex(0);
-          setRoutes([]);
-        }
+      const ranked = data.ranked && data.ranked.length > 0
+        ? data.ranked.map(r => newVenues.find(v => v.name === r.name || (r.name && v.name && v.name.toLowerCase().includes(r.name.toLowerCase().substring(0,8))))).filter(Boolean)
+        : newVenues;
+      const finalList = ranked.length > 0 ? ranked : newVenues;
+      setResults(prev => ({ ...prev, venues: finalList }));
+      setSelectedVenueIndex(0);
+      setRoutes([]);
+      const topVenue = finalList[0];
+      if (topVenue?.coords && results?.friends) {
+        const routePromises = results.friends.map(f =>
+          api.directions(f.coords.lat, f.coords.lng, topVenue.coords.lat, topVenue.coords.lng).catch(() => null)
+        );
+        Promise.all(routePromises).then(setRoutes);
       }
     } catch(e) { console.error(e); }
     setRefineLoading(false);
