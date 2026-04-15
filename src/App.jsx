@@ -141,7 +141,7 @@ function AddressInput({ value, onChange, onSelect, placeholder, color }) {
           {suggestions.map((s, i) => (
             <div key={s.place_id || i}
               onMouseDown={() => pick(s)}
-              onMouseEnter={e => e.currentTarget.style.background = '#F5EFE4'}
+              onMouseEnter={e => e.currentTarget.style.background = '#ede9fe'}
               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
               style={{ padding: '9px 14px', cursor: 'pointer', background: 'transparent',
                 borderBottom: i < suggestions.length - 1 ? '1px solid #EDE8DF' : 'none' }}>
@@ -156,7 +156,7 @@ function AddressInput({ value, onChange, onSelect, placeholder, color }) {
               )}
             </div>
           ))}
-          <div style={{ padding: '5px 14px', background: '#F5EFE4', borderTop: '1px solid #EDE8DF',
+          <div style={{ padding: '5px 14px', background: '#ede9fe', borderTop: '1px solid #EDE8DF',
             fontSize: 8, color: '#c4b5fd', textAlign: 'right', letterSpacing: '0.05em' }}>
             powered by Google
           </div>
@@ -174,7 +174,7 @@ function AddressInput({ value, onChange, onSelect, placeholder, color }) {
           onBlur={() => setTimeout(() => setOpen(false), 180)}
           placeholder={placeholder}
           style={{ flex: 1, background: 'none', border: 'none', outline: 'none',
-            color: '#3a3530', fontSize: 12, fontFamily: "'DM Mono', monospace" }}
+            color: '#1e1b4b', fontSize: 12, fontFamily: "'DM Mono', monospace" }}
         />
         {fetching && <span style={{ fontSize: 9, color: '#a78bfa', animation: 'spin 1s linear infinite', display: 'inline-block' }}>◌</span>}
       </div>
