@@ -325,23 +325,19 @@ export default function App() {
     if (!refineMsg.trim() || refineLoading) return;
     setRefineLoading(true);
     try {
-      const placesList = results.venues.map((p, i) => `${i+1}. ${p.name} at ${p.address || ''} — rated ${p.rating || 'N/A'}`).join('\n');
-      const prompt = `Here are venues ranked for a NYC meetup:\n${placesList}\n\nUser preference: "${refineMsg.trim()}"\n\nRe-rank these venues with this preference as a strong factor. Return ONLY this JSON:\n{"ranked": [{"name": "Venue Name", "reason": "brief reason"}, ...]}\nUse exact venue names from the list above.`;
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
+      const res = await fetch('/api/recommend', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': import.meta.env.VITE_ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true',
-        },
-        body: JSON.stringify({ model: 'claude-3-5-sonnet-20241022', max_tokens: 800, messages: [{ role: 'user', content: prompt }] })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          friends: results.friends,
+          venues: results.venues,
+          venueLabel: refineMsg.trim(),
+          refinement: refineMsg.trim(),
+        }),
       });
       const data = await res.json();
-      const text = data.content?.map(b => b.text || '').join('') || '';
-      const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
-      if (parsed.ranked && parsed.ranked.length > 0) {
-        const reranked = parsed.ranked.map(r =>
+      if (data.ranked && data.ranked.length > 0) {
+        const reranked = data.ranked.map(r =>
           results.venues.find(v => v.name === r.name || (r.name && v.name && v.name.toLowerCase().includes(r.name.toLowerCase().substring(0,8))))
         ).filter(Boolean);
         if (reranked.length >= 2) {
