@@ -343,12 +343,16 @@ export default function App() {
 
       // Rank via server + get travel fairness scores
       const friends = results.friends;
-      const [distRes, rankRes] = await Promise.all([
-        fetch('/api/distances', {
+      // Fetch distances per venue
+      const distResults = await Promise.all(
+        newVenues.map(v => fetch('/api/distances', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ origins: friends.map(f => f.coords), destinations: newVenues.map(v => v.coords) }),
-        }).then(r => r.json()).catch(() => null),
+          body: JSON.stringify({ origins: friends.map(f => f.coords), destination: v.coords }),
+        }).then(r => r.json()).catch(() => null))
+      );
+      const [_, rankRes] = await Promise.all([
+        Promise.resolve(null),
         fetch('/api/recommend', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -359,7 +363,7 @@ export default function App() {
       // Attach travel times + scores to venues
       const scoredVenues = newVenues.map((v, vi) => {
         const travel_times = friends.map((f, fi) => {
-          const el = distRes?.rows?.[fi]?.elements?.[vi];
+          const el = distResults[vi]?.rows?.[fi]?.elements?.[0];
           return el?.status === 'OK' ? { minutes: Math.round(el.duration.value / 60), text: el.duration.text, person: f.name } : { minutes: null, text: '—', person: f.name };
         });
         const valid = travel_times.filter(t => t.minutes !== null);
