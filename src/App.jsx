@@ -682,14 +682,6 @@ export default function App() {
               ))}
             </div>
 
-            {/* Midpoint */}
-            <div style={{ marginBottom: 12, padding: '10px 14px', background: 'rgba(193,123,47,0.06)',
-              borderRadius: 10, border: '1px solid rgba(193,123,47,0.2)' }}>
-              <div style={{ fontSize: 8, color: '#7c3aed', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 3 }}>meeting point</div>
-              <div style={{ fontSize: 15, color: '#1e1b4b', fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 800 }}>{results.midpoint}</div>
-              {results.midpoint_reason && <div style={{ fontSize: 10, color: '#8b5cf6', marginTop: 4, lineHeight: 1.5 }}>{results.midpoint_reason}</div>}
-            </div>
-
             <div style={{ fontSize: 8, color: '#a78bfa', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 12 }}>
               {selectedVenue.icon} top spots · best match first
             </div>
@@ -767,6 +759,14 @@ export default function App() {
                 </div>
               </div>
             ))}
+
+            {/* Midpoint */}
+            <div style={{ marginBottom: 12, padding: '10px 14px', background: 'rgba(124,58,237,0.06)',
+              borderRadius: 10, border: '1px solid rgba(124,58,237,0.2)' }}>
+              <div style={{ fontSize: 8, color: '#7c3aed', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 3 }}>meeting point</div>
+              <div style={{ fontSize: 15, color: '#1e1b4b', fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 800 }}>{results.midpoint}</div>
+              {results.midpoint_reason && <div style={{ fontSize: 10, color: '#8b5cf6', marginTop: 4, lineHeight: 1.5 }}>{results.midpoint_reason}</div>}
+            </div>
 
             {/* Search again button */}
             <button onClick={reset} style={{
