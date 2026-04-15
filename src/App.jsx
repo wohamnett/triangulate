@@ -12,8 +12,8 @@ const VENUE_TYPES = [
   { id: 'third_space', label: '3rd Spaces',        icon: '📚', query: 'library lounge coworking' },
 ];
 
-const COLORS = ['#7c3aed', '#B84A32', '#2E6BA8', '#2E7D52', '#6B42A8', '#B8325A'];
-const LIGHT_COLORS = ['#F4A724', '#E05A3A', '#5B9BD5', '#4CAF7D', '#9C6FDE', '#E91E8C'];
+const COLORS = ['#7c3aed', '#7c3aed', '#2E6BA8', '#2E7D52', '#6B42A8', '#B8325A'];
+const LIGHT_COLORS = ['#a78bfa', '#818cf8', '#5B9BD5', '#4CAF7D', '#9C6FDE', '#E91E8C'];
 
 const NAME_EXAMPLES = ['Will', 'Toby', 'Maya', 'Jess', 'Omar', 'Priya'];
 const LOCATION_EXAMPLES = [
@@ -150,7 +150,7 @@ function AddressInput({ value, onChange, onSelect, placeholder, color }) {
                 {s.structured_formatting?.main_text || s.description}
               </div>
               {s.structured_formatting?.secondary_text && (
-                <div style={{ fontSize: 10, color: '#9A9080', paddingLeft: 14 }}>
+                <div style={{ fontSize: 10, color: '#8b5cf6', paddingLeft: 14 }}>
                   {s.structured_formatting.secondary_text.replace(', USA', '')}
                 </div>
               )}
@@ -609,7 +609,7 @@ export default function App() {
                     />
                     {f.coords
                       ? <span style={{ fontSize: 11, color: '#4CAF7D', flexShrink: 0 }}>✓</span>
-                      : <span style={{ fontSize: 9, color: '#D4CCC0', flexShrink: 0 }}>pick from list</span>
+                      : <span style={{ fontSize: 9, color: '#ddd6fe', flexShrink: 0 }}>pick from list</span>
                     }
                   </div>
                 </div>
@@ -622,7 +622,7 @@ export default function App() {
                 color: '#a78bfa', fontSize: 11, cursor: 'pointer', fontFamily: "'DM Mono', monospace",
                 transition: 'all 0.15s' }}
                 onMouseOver={e => { e.target.style.borderColor = '#a78bfa'; e.target.style.color = '#6d28d9'; }}
-                onMouseOut={e => { e.target.style.borderColor = '#D4CCC0'; e.target.style.color = '#a78bfa'; }}>
+                onMouseOut={e => { e.target.style.borderColor = '#ddd6fe'; e.target.style.color = '#a78bfa'; }}>
                 + add another person
               </button>
             )}
@@ -631,7 +631,7 @@ export default function App() {
           {error && (
             <div style={{ padding: '10px 14px', background: 'rgba(184,74,50,0.06)',
               border: '1px solid rgba(184,74,50,0.2)', borderRadius: 6,
-              color: '#B84A32', fontSize: 11, marginBottom: 16, lineHeight: 1.5 }}>{error}</div>
+              color: '#7c3aed', fontSize: 11, marginBottom: 16, lineHeight: 1.5 }}>{error}</div>
           )}
 
           <button onClick={findMeetup} disabled={loading} style={{
@@ -651,7 +651,7 @@ export default function App() {
               : '→ FIND OUR SPOT'
             }
           </button>
-          <div style={{ marginTop: 10, fontSize: 9, color: '#D4CCC0', textAlign: 'center' }}>
+          <div style={{ marginTop: 10, fontSize: 9, color: '#ddd6fe', textAlign: 'center' }}>
             google geocoding · places · distance matrix · claude ai
           </div>
         </div>
@@ -708,7 +708,7 @@ export default function App() {
                     {v.isOpen !== null && (
                       <div style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(245,243,255,0.9)',
                         padding: '3px 8px', borderRadius: 4, fontSize: 9,
-                        color: v.isOpen ? '#2E7D52' : '#B84A32', border: `1px solid ${v.isOpen ? '#2E7D52' : '#B84A32'}` }}>
+                        color: v.isOpen ? '#2E7D52' : '#7c3aed', border: `1px solid ${v.isOpen ? '#2E7D52' : '#7c3aed'}` }}>
                         {v.isOpen ? 'Open now' : 'Closed'}
                       </div>
                     )}
@@ -727,13 +727,13 @@ export default function App() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
                       <span style={{ fontSize: 8, color: '#a78bfa', letterSpacing: '0.1em', textTransform: 'uppercase' }}>match score</span>
                       <span style={{ fontSize: 10 }}>
-                        <span style={{ color: (v.combined_score||0) >= 80 ? '#2E7D52' : (v.combined_score||0) >= 60 ? '#7c3aed' : '#B84A32', fontWeight: 600 }}>{v.combined_score ?? '—'}%</span>
+                        <span style={{ color: (v.combined_score||0) >= 80 ? '#2E7D52' : (v.combined_score||0) >= 60 ? '#7c3aed' : '#7c3aed', fontWeight: 600 }}>{v.combined_score ?? '—'}%</span>
                         <span style={{ color: '#c4b5fd', fontSize: 9 }}> · {v.fairness ?? '—'}% fair</span>
                       </span>
                     </div>
                     <div style={{ height: 3, background: '#ede9fe', borderRadius: 2 }}>
                       <div style={{ height: '100%', width: `${v.combined_score}%`, borderRadius: 2,
-                        background: v.combined_score >= 80 ? '#2E7D52' : v.combined_score >= 60 ? '#7c3aed' : '#B84A32' }} />
+                        background: v.combined_score >= 80 ? '#2E7D52' : v.combined_score >= 60 ? '#7c3aed' : '#7c3aed' }} />
                     </div>
                   </div>
 
