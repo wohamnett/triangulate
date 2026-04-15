@@ -781,6 +781,18 @@ export default function App() {
                   border: '1px solid #D4CCC0', borderRadius: 6, padding: '7px 10px', outline: 'none', color: '#1e1b4b' }}
               />
               <button onClick={refineSearch} disabled={refineLoading || !refineMsg.trim()}
+            {/* Search again button */}
+            <button onClick={reset} style={{
+              width: '100%', padding: '12px', marginTop: 4, marginBottom: 8,
+              background: '#7c3aed', border: 'none', borderRadius: 8,
+              color: 'white', fontSize: 12, fontWeight: 700, cursor: 'pointer',
+              fontFamily: "'Inter', system-ui, sans-serif", letterSpacing: '0.04em',
+              boxShadow: '0 2px 8px rgba(193,123,47,0.25)',
+            }}>
+              ← search again
+            </button>
+          </div>
+
                 style={{ background: refineLoading || !refineMsg.trim() ? '#ddd6fe' : '#7c3aed',
                   color: 'white', border: 'none', borderRadius: 6, padding: '7px 14px',
                   cursor: refineLoading || !refineMsg.trim() ? 'default' : 'pointer', fontSize: 14, fontWeight: 700 }}>
@@ -794,15 +806,3 @@ export default function App() {
     </div>
   );
 }
-            {/* Search again button */}
-            <button onClick={reset} style={{
-              width: '100%', padding: '12px', marginTop: 4, marginBottom: 8,
-              background: '#7c3aed', border: 'none', borderRadius: 8,
-              color: 'white', fontSize: 12, fontWeight: 700, cursor: 'pointer',
-              fontFamily: "'Inter', system-ui, sans-serif", letterSpacing: '0.04em',
-              boxShadow: '0 2px 8px rgba(193,123,47,0.25)',
-            }}>
-              ← search again
-            </button>
-          </div>
-
