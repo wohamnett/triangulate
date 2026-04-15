@@ -326,7 +326,6 @@ export default function App() {
     setRefineLoading(true);
     try {
       const midpoint = results.centroid;
-      // Search Google Places for new venues matching the refinement query
       const rawVenues = await api.places(refineMsg.trim(), midpoint.lat, midpoint.lng);
       const newVenues = rawVenues.map(p => ({
         name: p.name,
@@ -334,35 +333,38 @@ export default function App() {
         coords: { lat: p.geometry?.location?.lat, lng: p.geometry?.location?.lng },
         rating: p.rating,
         place_id: p.place_id,
-        isOpen: p.opening_hours?.open_now,
+        isOpen: p.opening_hours?.open_now ?? null,
+        travel_times: [],
       })).filter(p => p.coords?.lat);
       if (newVenues.length === 0) { setRefineLoading(false); setRefineMsg(''); return; }
-      // Rank them by travel fairness via server
+      // Rank via server
       const res = await fetch('/api/recommend', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          friends: results.friends,
-          venues: newVenues,
-          venueLabel: refineMsg.trim(),
-        }),
+        body: JSON.stringify({ friends: results.friends, venues: newVenues, venueLabel: refineMsg.trim() }),
       });
       const data = await res.json();
-      const ranked = data.ranked && data.ranked.length > 0
-        ? data.ranked.map(r => newVenues.find(v => v.name === r.name || (r.name && v.name && v.name.toLowerCase().includes(r.name.toLowerCase().substring(0,8))))).filter(Boolean)
-        : newVenues;
-      const finalList = ranked.length > 0 ? ranked : newVenues;
+      // Reorder newVenues by ranked order
+      let finalList = newVenues;
+      if (data.ranked && data.ranked.length > 0) {
+        const reordered = data.ranked
+          .map(r => newVenues.find(v => v.name && r.name && v.name.toLowerCase().includes(r.name.toLowerCase().substring(0, 6))))
+          .filter(Boolean);
+        if (reordered.length > 0) finalList = [...reordered, ...newVenues.filter(v => !reordered.includes(v))];
+      }
       setResults(prev => ({ ...prev, venues: finalList }));
       setSelectedVenueIndex(0);
-      setRoutes([]);
+      // Fetch directions for top venue
       const topVenue = finalList[0];
-      if (topVenue?.coords && results?.friends) {
-        const routePromises = results.friends.map(f =>
-          api.directions(f.coords.lat, f.coords.lng, topVenue.coords.lat, topVenue.coords.lng).catch(() => null)
+      if (topVenue?.coords) {
+        const friends = results.friends;
+        setRoutes([]);
+        const routePromises = friends.map(f =>
+          f.coords ? api.directions(f.coords.lat, f.coords.lng, topVenue.coords.lat, topVenue.coords.lng).catch(() => null) : Promise.resolve(null)
         );
         Promise.all(routePromises).then(setRoutes);
       }
-    } catch(e) { console.error(e); }
+    } catch(e) { console.error('refineSearch error:', e); }
     setRefineLoading(false);
     setRefineMsg('');
   };
