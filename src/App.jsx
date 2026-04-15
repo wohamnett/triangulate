@@ -781,6 +781,14 @@ export default function App() {
                   border: '1px solid #D4CCC0', borderRadius: 6, padding: '7px 10px', outline: 'none', color: '#1e1b4b' }}
               />
               <button onClick={refineSearch} disabled={refineLoading || !refineMsg.trim()}
+                style={{ background: refineLoading || !refineMsg.trim() ? '#ddd6fe' : '#7c3aed',
+                  color: 'white', border: 'none', borderRadius: 6, padding: '7px 14px',
+                  cursor: refineLoading || !refineMsg.trim() ? 'default' : 'pointer', fontSize: 14, fontWeight: 700 }}>
+                {refineLoading ? '⏳' : '🎲'}
+              </button>
+            </div>
+          </div>
+
             {/* Search again button */}
             <button onClick={reset} style={{
               width: '100%', padding: '12px', marginTop: 4, marginBottom: 8,
@@ -791,14 +799,6 @@ export default function App() {
             }}>
               ← search again
             </button>
-          </div>
-
-                style={{ background: refineLoading || !refineMsg.trim() ? '#ddd6fe' : '#7c3aed',
-                  color: 'white', border: 'none', borderRadius: 6, padding: '7px 14px',
-                  cursor: refineLoading || !refineMsg.trim() ? 'default' : 'pointer', fontSize: 14, fontWeight: 700 }}>
-                {refineLoading ? '⏳' : '🎲'}
-              </button>
-            </div>
           </div>
 
         </div>
