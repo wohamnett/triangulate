@@ -12,7 +12,7 @@ const VENUE_TYPES = [
   { id: 'third_space', label: '3rd Spaces',        icon: '📚', query: 'library lounge coworking' },
 ];
 
-const COLORS = ['#C17B2F', '#B84A32', '#2E6BA8', '#2E7D52', '#6B42A8', '#B8325A'];
+const COLORS = ['#7c3aed', '#B84A32', '#2E6BA8', '#2E7D52', '#6B42A8', '#B8325A'];
 const LIGHT_COLORS = ['#F4A724', '#E05A3A', '#5B9BD5', '#4CAF7D', '#9C6FDE', '#E91E8C'];
 
 const NAME_EXAMPLES = ['Will', 'Toby', 'Maya', 'Jess', 'Omar', 'Priya'];
@@ -136,7 +136,7 @@ function AddressInput({ value, onChange, onSelect, placeholder, color }) {
   // Portal dropdown rendered directly into document.body
   const dropdown = open && suggestions.length > 0
     ? (
-        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, zIndex: 9999, background: '#FDFAF5', border: '1px solid #D4CCC0',
+        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, zIndex: 9999, background: '#f5f3ff', border: '1px solid #D4CCC0',
           borderRadius: 8, overflow: 'hidden', boxShadow: '0 8px 24px rgba(0,0,0,0.15)' }}>
           {suggestions.map((s, i) => (
             <div key={s.place_id || i}
@@ -145,7 +145,7 @@ function AddressInput({ value, onChange, onSelect, placeholder, color }) {
               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
               style={{ padding: '9px 14px', cursor: 'pointer', background: 'transparent',
                 borderBottom: i < suggestions.length - 1 ? '1px solid #EDE8DF' : 'none' }}>
-              <div style={{ fontSize: 12, color: '#2a2520', fontFamily: "'DM Mono', monospace", marginBottom: 1 }}>
+              <div style={{ fontSize: 12, color: '#1e1b4b', fontFamily: "'DM Mono', monospace", marginBottom: 1 }}>
                 <span style={{ color, marginRight: 7, fontSize: 7 }}>●</span>
                 {s.structured_formatting?.main_text || s.description}
               </div>
@@ -157,7 +157,7 @@ function AddressInput({ value, onChange, onSelect, placeholder, color }) {
             </div>
           ))}
           <div style={{ padding: '5px 14px', background: '#F5EFE4', borderTop: '1px solid #EDE8DF',
-            fontSize: 8, color: '#C8C0B0', textAlign: 'right', letterSpacing: '0.05em' }}>
+            fontSize: 8, color: '#c4b5fd', textAlign: 'right', letterSpacing: '0.05em' }}>
             powered by Google
           </div>
         </div>
@@ -176,7 +176,7 @@ function AddressInput({ value, onChange, onSelect, placeholder, color }) {
           style={{ flex: 1, background: 'none', border: 'none', outline: 'none',
             color: '#3a3530', fontSize: 12, fontFamily: "'DM Mono', monospace" }}
         />
-        {fetching && <span style={{ fontSize: 9, color: '#B8A898', animation: 'spin 1s linear infinite', display: 'inline-block' }}>◌</span>}
+        {fetching && <span style={{ fontSize: 9, color: '#a78bfa', animation: 'spin 1s linear infinite', display: 'inline-block' }}>◌</span>}
       </div>
       {dropdown}
     </div>
@@ -211,7 +211,7 @@ function MapView({ friends, venues, midpoint, selectedVenueIndex, routes }) {
         <FitBounds points={allCoords} />
 
         <Circle center={[midpoint.lat, midpoint.lng]} radius={400}
-          pathOptions={{ color: '#C17B2F', fillColor: '#C17B2F', fillOpacity: 0.06, weight: 1, opacity: 0.3 }} />
+          pathOptions={{ color: '#7c3aed', fillColor: '#7c3aed', fillOpacity: 0.06, weight: 1, opacity: 0.3 }} />
 
         {/* Route lines */}
         {friends.filter(f => f.coords).map((f, i) => {
@@ -252,7 +252,7 @@ function MapView({ friends, venues, midpoint, selectedVenueIndex, routes }) {
         })}
 
         {venues.filter(v => v.coords).map((v, i) => {
-          const color = i === 0 ? '#C17B2F' : '#2E6BA8';
+          const color = i === 0 ? '#7c3aed' : '#2E6BA8';
           const icon = makeIcon(`<div style="width:32px;height:32px;border-radius:8px;background:${color};border:2.5px solid white;display:flex;align-items:center;justify-content:center;font-size:14px;color:white;font-weight:900;box-shadow:0 2px 8px rgba(0,0,0,0.2)">${i === 0 ? '★' : i + 1}</div>`);
           return (
             <Marker key={i} position={[v.coords.lat, v.coords.lng]} icon={icon}>
@@ -267,20 +267,20 @@ function MapView({ friends, venues, midpoint, selectedVenueIndex, routes }) {
       </MapContainer>
 
       <div style={{ position: 'absolute', bottom: 16, left: 16, zIndex: 1000,
-        background: 'rgba(253,250,245,0.95)', border: '1px solid #D4CCC0',
+        background: 'rgba(245,243,255,0.95)', border: '1px solid #D4CCC0',
         borderRadius: 8, padding: '10px 14px', pointerEvents: 'none',
         boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
         {friends.map((f, i) => (
-          <div key={f.id} style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 4, fontSize: 11, color: '#5a5040' }}>
+          <div key={f.id} style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 4, fontSize: 11, color: '#4c1d95' }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: LIGHT_COLORS[i % LIGHT_COLORS.length], flexShrink: 0 }} />
             {f.name}
           </div>
         ))}
         <div style={{ borderTop: '1px solid #EDE8DF', marginTop: 5, paddingTop: 5 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 3, fontSize: 11, color: '#5a5040' }}>
-            <span style={{ color: '#C17B2F', fontSize: 12 }}>★</span> best match
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 3, fontSize: 11, color: '#4c1d95' }}>
+            <span style={{ color: '#7c3aed', fontSize: 12 }}>★</span> best match
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 11, color: '#5a5040' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 11, color: '#4c1d95' }}>
             <span style={{ color: '#2E6BA8', fontSize: 12 }}>2,3</span> other spots
           </div>
         </div>
@@ -515,22 +515,31 @@ export default function App() {
   }, [friends, venueType, selectedVenue]);
 
   // ── Shared styles ────────────────────────────────────────────────────────────
-  const card = { background: '#FDFAF5', border: '1px solid #E0D8CC', borderRadius: 10 };
+  const card = { background: '#f5f3ff', border: '1px solid #E0D8CC', borderRadius: 10 };
 
   return (
-    <div style={{ fontFamily: "'DM Mono', monospace", minHeight: '100vh', background: '#F5F0E8', color: '#2a2520' }}>
+    <div style={{ fontFamily: "'DM Mono', monospace", minHeight: '100vh', background: '#F5F0E8', color: '#1e1b4b' }}>
 
       {/* Header */}
-      <div style={{ background: '#FDFAF5', borderBottom: '1px solid #E0D8CC', padding: '14px 28px',
+      <div style={{ background: '#f5f3ff', borderBottom: '1px solid #E0D8CC', padding: '14px 28px',
         display: 'flex', alignItems: 'center', gap: 12 }}>
         <div style={{ display: 'flex', gap: 5 }}>
           {LIGHT_COLORS.slice(0, 3).map((c, i) => <div key={i} style={{ width: 8, height: 8, borderRadius: '50%', background: c }} />)}
         </div>
-        <span style={{ fontFamily: "'Syne', sans-serif", fontSize: 16, fontWeight: 800, letterSpacing: '0.04em', color: '#2a2520' }}>TRIANGULATE</span>
-        <span style={{ fontSize: 10, color: '#C8C0B0', marginLeft: 2 }}>/ nyc meetup finder</span>
+        <svg width="22" height="20" viewBox="0 0 24 22" fill="none" style={{ flexShrink: 0, marginRight: 6 }}>
+          <line x1="3" y1="3" x2="12" y2="12" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round"/>
+          <line x1="21" y1="3" x2="12" y2="12" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round"/>
+          <line x1="12" y1="20" x2="12" y2="12" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round"/>
+          <circle cx="3" cy="3" r="3" fill="#a78bfa"/>
+          <circle cx="21" cy="3" r="3" fill="#a78bfa"/>
+          <circle cx="12" cy="20" r="3" fill="#a78bfa"/>
+          <circle cx="12" cy="12" r="4" fill="#7c3aed"/>
+        </svg>
+        <span style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 16, fontWeight: 800, letterSpacing: '0.04em', color: '#1e1b4b' }}>triangulate</span>
+        <span style={{ fontSize: 10, color: '#c4b5fd', marginLeft: 2 }}>/ nyc meetup finder</span>
         {step === 'results' && (
           <button onClick={reset}
-            style={{ marginLeft: 'auto', background: '#C17B2F', border: 'none', borderRadius: 6,
+            style={{ marginLeft: 'auto', background: '#7c3aed', border: 'none', borderRadius: 6,
               color: 'white', padding: '7px 18px', fontSize: 11, cursor: 'pointer',
               fontFamily: "'DM Mono', monospace", fontWeight: 500, letterSpacing: '0.04em' }}>
             ← new search
@@ -544,7 +553,7 @@ export default function App() {
 
           {/* Venue type */}
           <div style={{ marginBottom: 32 }}>
-            <div style={{ fontSize: 9, color: '#B8A898', letterSpacing: '0.16em', textTransform: 'uppercase', marginBottom: 10 }}>
+            <div style={{ fontSize: 9, color: '#a78bfa', letterSpacing: '0.16em', textTransform: 'uppercase', marginBottom: 10 }}>
               01 / what are you looking for?
             </div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -553,8 +562,8 @@ export default function App() {
                   padding: '8px 15px', borderRadius: 6, fontSize: 12, cursor: 'pointer',
                   fontFamily: "'DM Mono', monospace", transition: 'all 0.12s',
                   border: venueType === v.id ? '1.5px solid #C17B2F' : '1px solid #D4CCC0',
-                  background: venueType === v.id ? 'rgba(193,123,47,0.08)' : '#FDFAF5',
-                  color: venueType === v.id ? '#C17B2F' : '#7a7060',
+                  background: venueType === v.id ? 'rgba(193,123,47,0.08)' : '#f5f3ff',
+                  color: venueType === v.id ? '#7c3aed' : '#6d28d9',
                 }}>{v.icon} {v.label}</button>
               ))}
             </div>
@@ -562,7 +571,7 @@ export default function App() {
 
           {/* Friends */}
           <div style={{ marginBottom: 28 }}>
-            <div style={{ fontSize: 9, color: '#B8A898', letterSpacing: '0.16em', textTransform: 'uppercase', marginBottom: 4 }}>
+            <div style={{ fontSize: 9, color: '#a78bfa', letterSpacing: '0.16em', textTransform: 'uppercase', marginBottom: 4 }}>
               02 / who's coming? ({friends.length}/6)
             </div>
             <div style={{ fontSize: 11, color: '#A89888', marginBottom: 14, lineHeight: 1.6 }}>
@@ -575,22 +584,22 @@ export default function App() {
                   {/* Name row */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderBottom: '1px solid #EDE8DF' }}>
                     <div style={{ width: 6, height: 6, borderRadius: '50%', background: LIGHT_COLORS[i % LIGHT_COLORS.length], flexShrink: 0 }} />
-                    <div style={{ fontSize: 9, color: '#B8A898', width: 36, flexShrink: 0 }}>name</div>
+                    <div style={{ fontSize: 9, color: '#a78bfa', width: 36, flexShrink: 0 }}>name</div>
                     <input
                       defaultValue={f.name}
                       onInput={e => updateFriend(f.id, 'name', e.target.value)}
                       placeholder={`e.g. ${NAME_EXAMPLES[i] || 'Alex'}`}
                       style={{ flex: 1, background: 'none', border: 'none', outline: 'none',
-                        color: '#2a2520', fontSize: 13, fontFamily: "'Syne', sans-serif", fontWeight: 700 }} />
+                        color: '#1e1b4b', fontSize: 13, fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 700 }} />
                     {friends.length > 2 && (
                       <button onClick={() => removeFriend(f.id)}
-                        style={{ background: 'none', border: 'none', color: '#C8C0B0', cursor: 'pointer', fontSize: 16, padding: '0 2px', lineHeight: 1 }}>×</button>
+                        style={{ background: 'none', border: 'none', color: '#c4b5fd', cursor: 'pointer', fontSize: 16, padding: '0 2px', lineHeight: 1 }}>×</button>
                     )}
                   </div>
                   {/* Location row */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px' }}>
-                    <div style={{ fontSize: 9, color: '#B8A898', flexShrink: 0 }}>📍</div>
-                    <div style={{ fontSize: 9, color: '#B8A898', width: 36, flexShrink: 0 }}>from</div>
+                    <div style={{ fontSize: 9, color: '#a78bfa', flexShrink: 0 }}>📍</div>
+                    <div style={{ fontSize: 9, color: '#a78bfa', width: 36, flexShrink: 0 }}>from</div>
                     <AddressInput
                       value={f.address}
                       onChange={val => updateFriend(f.id, 'address', val)}
@@ -610,10 +619,10 @@ export default function App() {
             {friends.length < 6 && (
               <button onClick={addFriend} style={{ marginTop: 8, width: '100%', padding: '9px',
                 background: 'transparent', border: '1.5px dashed #D4CCC0', borderRadius: 8,
-                color: '#B8A898', fontSize: 11, cursor: 'pointer', fontFamily: "'DM Mono', monospace",
+                color: '#a78bfa', fontSize: 11, cursor: 'pointer', fontFamily: "'DM Mono', monospace",
                 transition: 'all 0.15s' }}
-                onMouseOver={e => { e.target.style.borderColor = '#B8A898'; e.target.style.color = '#7a7060'; }}
-                onMouseOut={e => { e.target.style.borderColor = '#D4CCC0'; e.target.style.color = '#B8A898'; }}>
+                onMouseOver={e => { e.target.style.borderColor = '#a78bfa'; e.target.style.color = '#6d28d9'; }}
+                onMouseOut={e => { e.target.style.borderColor = '#D4CCC0'; e.target.style.color = '#a78bfa'; }}>
                 + add another person
               </button>
             )}
@@ -627,11 +636,11 @@ export default function App() {
 
           <button onClick={findMeetup} disabled={loading} style={{
             width: '100%', padding: '14px',
-            background: loading ? '#EDE8DF' : 'linear-gradient(135deg, #C17B2F, #B84A32)',
+            background: loading ? '#ede9fe' : 'linear-gradient(135deg, #C17B2F, #B84A32)',
             border: 'none', borderRadius: 8,
-            color: loading ? '#B8A898' : 'white', fontSize: 13, fontWeight: 700,
+            color: loading ? '#a78bfa' : 'white', fontSize: 13, fontWeight: 700,
             cursor: loading ? 'not-allowed' : 'pointer',
-            fontFamily: "'Syne', sans-serif", letterSpacing: '0.05em',
+            fontFamily: "'Inter', system-ui, sans-serif", letterSpacing: '0.05em',
             boxShadow: loading ? 'none' : '0 2px 12px rgba(193,123,47,0.3)',
           }}>
             {loading
@@ -663,12 +672,12 @@ export default function App() {
 
             {/* Crew */}
             <div style={{ ...card, marginBottom: 12, padding: '10px 14px' }}>
-              <div style={{ fontSize: 8, color: '#B8A898', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 8 }}>the crew</div>
+              <div style={{ fontSize: 8, color: '#a78bfa', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 8 }}>the crew</div>
               {results.friends.map((f, i) => (
                 <div key={f.id} style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 4 }}>
                   <span style={{ width: 6, height: 6, borderRadius: '50%', background: LIGHT_COLORS[i % LIGHT_COLORS.length], display: 'inline-block', flexShrink: 0 }} />
-                  <span style={{ fontSize: 12, color: '#2a2520', fontFamily: "'Syne', sans-serif", fontWeight: 700, flexShrink: 0 }}>{f.name}</span>
-                  <span style={{ fontSize: 9, color: '#B8A898', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.address}</span>
+                  <span style={{ fontSize: 12, color: '#1e1b4b', fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 700, flexShrink: 0 }}>{f.name}</span>
+                  <span style={{ fontSize: 9, color: '#a78bfa', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.address}</span>
                 </div>
               ))}
             </div>
@@ -676,28 +685,28 @@ export default function App() {
             {/* Midpoint */}
             <div style={{ marginBottom: 12, padding: '10px 14px', background: 'rgba(193,123,47,0.06)',
               borderRadius: 10, border: '1px solid rgba(193,123,47,0.2)' }}>
-              <div style={{ fontSize: 8, color: '#C17B2F', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 3 }}>meeting point</div>
-              <div style={{ fontSize: 15, color: '#2a2520', fontFamily: "'Syne', sans-serif", fontWeight: 800 }}>{results.midpoint}</div>
-              {results.midpoint_reason && <div style={{ fontSize: 10, color: '#9A8870', marginTop: 4, lineHeight: 1.5 }}>{results.midpoint_reason}</div>}
+              <div style={{ fontSize: 8, color: '#7c3aed', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 3 }}>meeting point</div>
+              <div style={{ fontSize: 15, color: '#1e1b4b', fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 800 }}>{results.midpoint}</div>
+              {results.midpoint_reason && <div style={{ fontSize: 10, color: '#8b5cf6', marginTop: 4, lineHeight: 1.5 }}>{results.midpoint_reason}</div>}
             </div>
 
-            <div style={{ fontSize: 8, color: '#B8A898', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 12 }}>
+            <div style={{ fontSize: 8, color: '#a78bfa', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 12 }}>
               {selectedVenue.icon} top spots · best match first
             </div>
 
             {/* Venue cards */}
             {results.venues.map((v, i) => (
               <div key={i} onClick={() => selectVenue(i)} style={{ ...card, marginBottom: 12, cursor: "pointer",
-                border: `1px solid ${i === 0 ? 'rgba(193,123,47,0.4)' : '#E0D8CC'}` }}>
+                border: `1px solid ${i === 0 ? 'rgba(124,58,237,0.4)' : '#ddd6fe'}` }}>
                 {v.photo && (
                   <div style={{ height: 100, overflow: 'hidden', position: 'relative', borderRadius: '10px 10px 0 0' }}>
                     <img src={v.photo} alt={v.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       onError={e => e.target.parentElement.style.display = 'none'} />
-                    {i === 0 && <div style={{ position: 'absolute', top: 8, left: 8, background: '#C17B2F',
+                    {i === 0 && <div style={{ position: 'absolute', top: 8, left: 8, background: '#7c3aed',
                       color: 'white', fontSize: 8, fontWeight: 800, padding: '3px 8px', borderRadius: 4,
-                      fontFamily: "'Syne',sans-serif", letterSpacing: '0.1em' }}>★ TOP PICK</div>}
+                      fontFamily: "'Inter', system-ui, sans-serif", letterSpacing: '0.1em' }}>★ TOP PICK</div>}
                     {v.isOpen !== null && (
-                      <div style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(253,250,245,0.9)',
+                      <div style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(245,243,255,0.9)',
                         padding: '3px 8px', borderRadius: 4, fontSize: 9,
                         color: v.isOpen ? '#2E7D52' : '#B84A32', border: `1px solid ${v.isOpen ? '#2E7D52' : '#B84A32'}` }}>
                         {v.isOpen ? 'Open now' : 'Closed'}
@@ -707,24 +716,24 @@ export default function App() {
                 )}
                 <div style={{ padding: '12px 14px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 3 }}>
-                    <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 13, color: '#2a2520', lineHeight: 1.2, paddingRight: 8 }}>{v.name}</div>
-                    {v.rating && <span style={{ fontSize: 11, color: '#C17B2F', flexShrink: 0, fontWeight: 600 }}>★ {v.rating}</span>}
+                    <div style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 800, fontSize: 13, color: '#1e1b4b', lineHeight: 1.2, paddingRight: 8 }}>{v.name}</div>
+                    {v.rating && <span style={{ fontSize: 11, color: '#7c3aed', flexShrink: 0, fontWeight: 600 }}>★ {v.rating}</span>}
                   </div>
-                  <div style={{ fontSize: 10, color: '#9A8870', marginBottom: 6, lineHeight: 1.4 }}>{v.address}</div>
-                  {v.recommendation_reason && <div style={{ fontSize: 11, color: '#5a5040', marginBottom: 8, lineHeight: 1.5 }}>{v.recommendation_reason}</div>}
+                  <div style={{ fontSize: 10, color: '#8b5cf6', marginBottom: 6, lineHeight: 1.4 }}>{v.address}</div>
+                  {v.recommendation_reason && <div style={{ fontSize: 11, color: '#4c1d95', marginBottom: 8, lineHeight: 1.5 }}>{v.recommendation_reason}</div>}
 
                   {/* Score bar */}
                   <div style={{ marginBottom: 10 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-                      <span style={{ fontSize: 8, color: '#B8A898', letterSpacing: '0.1em', textTransform: 'uppercase' }}>match score</span>
+                      <span style={{ fontSize: 8, color: '#a78bfa', letterSpacing: '0.1em', textTransform: 'uppercase' }}>match score</span>
                       <span style={{ fontSize: 10 }}>
-                        <span style={{ color: (v.combined_score||0) >= 80 ? '#2E7D52' : (v.combined_score||0) >= 60 ? '#C17B2F' : '#B84A32', fontWeight: 600 }}>{v.combined_score ?? '—'}%</span>
-                        <span style={{ color: '#C8C0B0', fontSize: 9 }}> · {v.fairness ?? '—'}% fair</span>
+                        <span style={{ color: (v.combined_score||0) >= 80 ? '#2E7D52' : (v.combined_score||0) >= 60 ? '#7c3aed' : '#B84A32', fontWeight: 600 }}>{v.combined_score ?? '—'}%</span>
+                        <span style={{ color: '#c4b5fd', fontSize: 9 }}> · {v.fairness ?? '—'}% fair</span>
                       </span>
                     </div>
-                    <div style={{ height: 3, background: '#EDE8DF', borderRadius: 2 }}>
+                    <div style={{ height: 3, background: '#ede9fe', borderRadius: 2 }}>
                       <div style={{ height: '100%', width: `${v.combined_score}%`, borderRadius: 2,
-                        background: v.combined_score >= 80 ? '#2E7D52' : v.combined_score >= 60 ? '#C17B2F' : '#B84A32' }} />
+                        background: v.combined_score >= 80 ? '#2E7D52' : v.combined_score >= 60 ? '#7c3aed' : '#B84A32' }} />
                     </div>
                   </div>
 
@@ -733,14 +742,14 @@ export default function App() {
                     {(v.travel_times||[]).map((t, j) => (
                       <div key={j} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         <div style={{ width: 5, height: 5, borderRadius: '50%', background: LIGHT_COLORS[j % LIGHT_COLORS.length], flexShrink: 0 }} />
-                        <span style={{ fontSize: 10, color: '#7a7060', width: 50, flexShrink: 0 }}>{t.person}</span>
-                        <span style={{ fontSize: 10, fontFamily: "'DM Mono'", color: t.minutes ? '#2a2520' : '#C8C0B0', width: 30, flexShrink: 0 }}>{t.minutes ? `${t.minutes}m` : '—'}</span>
-                        <span style={{ fontSize: 9, color: '#7a7060', display: 'flex', gap: 3, flexWrap: 'wrap', alignItems: 'center' }}>
+                        <span style={{ fontSize: 10, color: '#6d28d9', width: 50, flexShrink: 0 }}>{t.person}</span>
+                        <span style={{ fontSize: 10, fontFamily: "'DM Mono'", color: t.minutes ? '#1e1b4b' : '#c4b5fd', width: 30, flexShrink: 0 }}>{t.minutes ? `${t.minutes}m` : '—'}</span>
+                        <span style={{ fontSize: 9, color: '#6d28d9', display: 'flex', gap: 3, flexWrap: 'wrap', alignItems: 'center' }}>
                           {routes[j]?.steps?.length ? routes[j].steps.map((s, si) => (
                             <span key={si} style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                              {si > 0 && <span style={{ color: '#C8C0B0' }}>›</span>}
+                              {si > 0 && <span style={{ color: '#c4b5fd' }}>›</span>}
                               <span>{s.mode === 'WALKING' ? '🚶' : s.vehicle === 'SUBWAY' ? '🚇' : s.vehicle === 'BUS' ? '🚌' : '🚆'}</span>
-                              {s.line && <span style={{ fontSize: 8, background: '#2a2520', color: 'white', borderRadius: 3, padding: '1px 4px' }}>{s.line}</span>}
+                              {s.line && <span style={{ fontSize: 8, background: '#1e1b4b', color: 'white', borderRadius: 3, padding: '1px 4px' }}>{s.line}</span>}
                               <span style={{ fontSize: 9 }}>{s.duration}</span>
                             </span>
                           )) : t.route ? <span>{t.route}</span> : <span>🚇</span>}
@@ -762,9 +771,9 @@ export default function App() {
             {/* Search again button */}
             <button onClick={reset} style={{
               width: '100%', padding: '12px', marginTop: 4, marginBottom: 8,
-              background: '#C17B2F', border: 'none', borderRadius: 8,
+              background: '#7c3aed', border: 'none', borderRadius: 8,
               color: 'white', fontSize: 12, fontWeight: 700, cursor: 'pointer',
-              fontFamily: "'Syne', sans-serif", letterSpacing: '0.04em',
+              fontFamily: "'Inter', system-ui, sans-serif", letterSpacing: '0.04em',
               boxShadow: '0 2px 8px rgba(193,123,47,0.25)',
             }}>
               ← search again
@@ -773,18 +782,18 @@ export default function App() {
 
           {/* Refine results */}
           <div style={{ marginTop: 16, borderTop: '1px solid #E0D8CC', paddingTop: 14 }}>
-            <div style={{ fontSize: 10, fontFamily: "'DM Mono', monospace", color: '#B8A898', letterSpacing: '0.08em', marginBottom: 8, textTransform: 'uppercase' }}>refine results</div>
+            <div style={{ fontSize: 10, fontFamily: "'DM Mono', monospace", color: '#a78bfa', letterSpacing: '0.08em', marginBottom: 8, textTransform: 'uppercase' }}>refine results</div>
             <div style={{ display: 'flex', gap: 8 }}>
               <input
                 value={refineMsg}
                 onChange={e => setRefineMsg(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && refineSearch()}
                 placeholder="e.g. outdoor space, divey bar..."
-                style={{ flex: 1, fontSize: 12, fontFamily: "'DM Mono', monospace", background: '#FDFAF5',
-                  border: '1px solid #D4CCC0', borderRadius: 6, padding: '7px 10px', outline: 'none', color: '#2a2520' }}
+                style={{ flex: 1, fontSize: 12, fontFamily: "'DM Mono', monospace", background: '#f5f3ff',
+                  border: '1px solid #D4CCC0', borderRadius: 6, padding: '7px 10px', outline: 'none', color: '#1e1b4b' }}
               />
               <button onClick={refineSearch} disabled={refineLoading || !refineMsg.trim()}
-                style={{ background: refineLoading || !refineMsg.trim() ? '#E0D8CC' : '#C17B2F',
+                style={{ background: refineLoading || !refineMsg.trim() ? '#ddd6fe' : '#7c3aed',
                   color: 'white', border: 'none', borderRadius: 6, padding: '7px 14px',
                   cursor: refineLoading || !refineMsg.trim() ? 'default' : 'pointer', fontSize: 14, fontWeight: 700 }}>
                 {refineLoading ? '⏳' : '🎲'}
