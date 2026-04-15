@@ -327,7 +327,7 @@ export default function App() {
     try {
       const midpoint = results.centroid;
       const rawVenues = await api.places(refineMsg.trim(), midpoint.lat, midpoint.lng);
-      const newVenues = rawVenues.map(p => ({
+      const newVenues = rawVenues.slice(0, 5).map(p => ({
         name: p.name,
         address: p.formatted_address || p.vicinity || '',
         coords: { lat: p.geometry?.location?.lat, lng: p.geometry?.location?.lng },
@@ -335,33 +335,62 @@ export default function App() {
         place_id: p.place_id,
         isOpen: p.opening_hours?.open_now ?? null,
         travel_times: [],
-        photo: p.photos?.[0]?.photo_reference
-          ? `/api/photo?ref=${p.photos[0].photo_reference}`
-          : null,
+        photo: p.photos?.[0]?.photo_reference ? `/api/photo?ref=${p.photos[0].photo_reference}` : null,
+        combined_score: null,
+        fairness: null,
       })).filter(p => p.coords?.lat);
       if (newVenues.length === 0) { setRefineLoading(false); setRefineMsg(''); return; }
-      // Rank via server
-      const res = await fetch('/api/recommend', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ friends: results.friends, venues: newVenues, venueLabel: refineMsg.trim() }),
+
+      // Rank via server + get travel fairness scores
+      const friends = results.friends;
+      const [distRes, rankRes] = await Promise.all([
+        fetch('/api/distances', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ origins: friends.map(f => f.coords), destinations: newVenues.map(v => v.coords) }),
+        }).then(r => r.json()).catch(() => null),
+        fetch('/api/recommend', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ friends, venues: newVenues, venueLabel: refineMsg.trim() }),
+        }).then(r => r.json()).catch(() => ({ ranked: [] })),
+      ]);
+
+      // Attach travel times + scores to venues
+      const scoredVenues = newVenues.map((v, vi) => {
+        const travel_times = friends.map((f, fi) => {
+          const el = distRes?.rows?.[fi]?.elements?.[vi];
+          return el?.status === 'OK' ? { minutes: Math.round(el.duration.value / 60), text: el.duration.text } : { minutes: null, text: '—' };
+        });
+        const valid = travel_times.filter(t => t.minutes !== null);
+        const avg = valid.length ? valid.reduce((s, t) => s + t.minutes, 0) / valid.length : null;
+        const max = valid.length ? Math.max(...valid.map(t => t.minutes)) : null;
+        const fairness = avg && max ? Math.round((1 - (max - avg) / (max + 1)) * 100) : null;
+        return { ...v, travel_times, fairness };
       });
-      const data = await res.json();
-      // Reorder newVenues by ranked order
-      let finalList = newVenues;
-      if (data.ranked && data.ranked.length > 0) {
-        const reordered = data.ranked
-          .map(r => newVenues.find(v => v.name && r.name && v.name.toLowerCase().includes(r.name.toLowerCase().substring(0, 6))))
+
+      // Reorder by ranked
+      let finalList = scoredVenues;
+      if (rankRes.ranked?.length > 0) {
+        const reordered = rankRes.ranked
+          .map(r => scoredVenues.find(v => v.name && r.name && (v.name === r.name || v.name.toLowerCase().includes(r.name.toLowerCase().substring(0, 8)))))
           .filter(Boolean);
-        if (reordered.length > 0) finalList = [...reordered, ...newVenues.filter(v => !reordered.includes(v))];
+        if (reordered.length > 0) {
+          finalList = [...reordered, ...scoredVenues.filter(v => !reordered.includes(v))];
+        }
       }
+
+      // Add combined score based on rank + fairness
+      finalList = finalList.slice(0, 3).map((v, i) => ({
+        ...v,
+        combined_score: v.fairness !== null ? Math.round(v.fairness * 0.5 + Math.max(0, 100 - i * 20) * 0.5) : null,
+      }));
+
       setResults(prev => ({ ...prev, venues: finalList }));
       setSelectedVenueIndex(0);
-      // Fetch directions for top venue
+      setRoutes([]);
       const topVenue = finalList[0];
       if (topVenue?.coords) {
-        const friends = results.friends;
-        setRoutes([]);
         const routePromises = friends.map(f =>
           f.coords ? api.directions(f.coords.lat, f.coords.lng, topVenue.coords.lat, topVenue.coords.lng).catch(() => null) : Promise.resolve(null)
         );
