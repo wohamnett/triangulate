@@ -172,6 +172,7 @@ function AddressInput({ value, onChange, onSelect, placeholder, color }) {
           onChange={handleChange}
           onFocus={() => { if (suggestions.length > 0) { setOpen(true); } }}
           onBlur={() => setTimeout(() => setOpen(false), 180)}
+          onKeyDown={e => e.key === ' ' && e.stopPropagation()}
           placeholder={placeholder}
           style={{ flex: 1, background: 'none', border: 'none', outline: 'none',
             color: '#1e1b4b', fontSize: 16, fontFamily: "'DM Mono', monospace" }}
@@ -588,6 +589,7 @@ export default function App() {
                     <input
                       defaultValue={f.name}
                       onInput={e => updateFriend(f.id, 'name', e.target.value)}
+                      onKeyDown={e => e.key === ' ' && e.stopPropagation()}
                       placeholder={`e.g. ${NAME_EXAMPLES[i] || 'Alex'}`}
                       style={{ flex: 1, background: 'none', border: 'none', outline: 'none',
                         color: '#1e1b4b', fontSize: 13, fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 700 }} />
@@ -775,7 +777,7 @@ export default function App() {
               <input
                 value={refineMsg}
                 onChange={e => setRefineMsg(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && refineSearch()}
+                onKeyDown={e => { if (e.key === " ") e.stopPropagation(); if (e.key === "Enter") refineSearch(); }}
                 placeholder="e.g. outdoor space, divey bar..."
                 style={{ flex: 1, fontSize: 16, fontFamily: "'DM Mono', monospace", background: '#f5f3ff',
                   border: '1px solid #D4CCC0', borderRadius: 6, padding: '7px 10px', outline: 'none', color: '#1e1b4b' }}
